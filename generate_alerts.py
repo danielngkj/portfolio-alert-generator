@@ -1,54 +1,67 @@
+import argparse
+from datetime import date, timedelta
+from pathlib import Path
+
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
 taxonomy_map = {
-    "Control Board": "Machine Control",
-    "Connectivity Module": "Machine Control",
+    "Control Board": "Control",
+    "Connectivity Module": "Control",
     "Cleaning System": "Maintenance",
-    "Ingredient Hoppers": "Ingredient Handling",
-    "Main Controller": "Machine Control",
-    "Payment Terminal": "Cashless Payment",
-    "Boiler and Tank Assembly": "Beverage Preparation",
-    "Water Supply Line": "Water System",
-    "Dispense Nozzle": "Beverage Preparation",
-    "Door Interlock": "Safety & Access",
-    "Payment Gateway Interface": "Cashless Payment",
-    "Receipt Printer": "Customer Interface",
-    "Bean Hopper": "Ingredient Handling",
-    "Milk Reservoir": "Ingredient Handling",
-    "Water Tank": "Water System",
-    "Card Reader": "Cashless Payment",
-    "Touchscreen Display": "Customer Interface",
+    "Ingredient Hoppers": "Ingredients",
+    "Main Controller": "Control",
+    "Payment Terminal": "Payment",
+    "Boiler and Tank Assembly": "Brew",
+    "Water Supply Line": "Water",
+    "Dispense Nozzle": "Brew",
+    "Door Interlock": "Safety",
+    "Payment Gateway Interface": "Payment",
+    "Receipt Printer": "Display",
+    "Bean Hopper": "Ingredients",
+    "Milk Reservoir": "Ingredients",
+    "Water Tank": "Water",
+    "Card Reader": "Payment",
+    "Touchscreen Display": "Display",
     "Drip Tray": "Maintenance",
-    "Pump Motor": "Beverage Preparation",
-    "Dispense Valve": "Beverage Preparation",
-    "Network Interface": "Machine Control",
-    "Cup Dispenser": "Beverage Handling",
+    "Pump Motor": "Brew",
+    "Dispense Valve": "Brew",
+    "Network Interface": "Control",
+    "Cup Dispenser": "Dispense",
     "Service Scheduler": "Maintenance",
-    "Pump Assembly": "Beverage Preparation",
-    "Payment Reader Board": "Cashless Payment",
-    "Brew Group": "Beverage Preparation",
-    "Boiler Control": "Beverage Preparation",
-    "Cooling Fan": "Thermal Management",
-    "Boiler Chamber": "Beverage Preparation",
-    "Milk Pump": "Ingredient Handling",
-    "Power Supply Unit": "Electrical System",
-    "Coffee Grinder": "Beverage Preparation",
-    "Water Reservoir": "Water System",
-    "Boiler and Heating Circuit": "Beverage Preparation",
-    "Customer Interface": "Customer Interface",
-    "Electrical System": "Electrical System",
-    "Thermal Management": "Thermal Management",
-    "Safety & Access": "Safety & Access",
-    "Beverage Handling": "Beverage Handling",
-    "Ingredient Handling": "Ingredient Handling",
-    "Water System": "Water System",
-    "Beverage Preparation": "Beverage Preparation",
-    "Machine Control": "Machine Control",
+    "Pump Assembly": "Brew",
+    "Payment Reader Board": "Payment",
+    "Brew Group": "Brew",
+    "Boiler Control": "Brew",
+    "Cooling Fan": "Cooling",
+    "Boiler Chamber": "Brew",
+    "Milk Pump": "Ingredients",
+    "Power Supply Unit": "Power",
+    "Coffee Grinder": "Brew",
+    "Water Reservoir": "Water",
+    "Boiler and Heating Circuit": "Brew",
+    "Customer Interface": "Display",
+    "Electrical System": "Power",
+    "Thermal Management": "Cooling",
+    "Safety & Access": "Safety",
+    "Beverage Handling": "Dispense",
+    "Ingredient Handling": "Ingredients",
+    "Water System": "Water",
+    "Beverage Preparation": "Brew",
+    "Machine Control": "Control",
     "Maintenance": "Maintenance",
-    "Cashless Payment": "Cashless Payment",
+    "Cashless Payment": "Payment",
+    "Display": "Display",
+    "Cooling": "Cooling",
+    "Power": "Power",
+    "Safety": "Safety",
+    "Dispense": "Dispense",
+    "Ingredients": "Ingredients",
+    "Water": "Water",
+    "Brew": "Brew",
 }
+
 
 info_templates = [
     {
@@ -352,7 +365,7 @@ critical_templates = [
 ]
 
 alerts = []
-for idx in range(24):
+for idx in range(19):
     template = info_templates[idx % len(info_templates)]
     alerts.append({
         "type": "Informational",
@@ -360,7 +373,7 @@ for idx in range(24):
         "title": template["title"],
         "description": template["description"],
         "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Machine Control"),
+        "collection": taxonomy_map.get(template["component"], "Control"),
         "service": template["service"],
         "technician": template["technician"],
     })
@@ -372,7 +385,7 @@ for idx in range(40):
         "title": template["title"],
         "description": template["description"],
         "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Machine Control"),
+        "collection": taxonomy_map.get(template["component"], "Control"),
         "service": template["service"],
         "technician": template["technician"],
     })
@@ -384,56 +397,132 @@ for idx in range(16):
         "title": template["title"],
         "description": template["description"],
         "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Machine Control"),
+        "collection": taxonomy_map.get(template["component"], "Control"),
         "service": template["service"],
         "technician": template["technician"],
     })
 
-workbook = Workbook()
-worksheet = workbook.active
-worksheet.title = "Alerts"
-
 headers = [
-    "Alert ID",
+    "ID",
     "Alert Title",
     "Type",
     "Severity",
     "Alert Description",
-    "Related Coffee Machine Component",
-    "Collection",
+    "Component",
+    "Operator Response",
+    "Model",
+    "Last Update",
+    "Version",
+    "Notes",
+    "Critical Stop Response",
     "Service Response",
     "Technician Response",
 ]
-worksheet.append(headers)
 
-for index, alert in enumerate(alerts, start=1):
-    worksheet.append([
-        f"{index:03d}",
-        alert["title"],
-        alert["type"],
-        alert["severity"],
-        alert["description"],
-        alert["component"],
-        alert["collection"],
-        alert["service"],
-        alert["technician"],
-    ])
+operator_responses = {
+    "Maintenance Reminder Pending": "Run service restart.\nRun maintenance cycle.",
+    "Low Bean Hopper": "Refill bean hopper.",
+    "Milk Tank Below Target": "Refill milk tank.",
+    "Water Level Warning": "Refill water tank.",
+    "Payment Retry Rate Elevated": "Disconnect and reconnect payment machine.\nTry with secondary payment method.\nReconnect primary machine.",
+    "Drip Tray Almost Full": "Empty drip tray.",
+    "Payment Blocked": "Check network is up.\nFollow payment machine restart procedure.\nRetry again.\nIf problem persists, call service team.",
+    "Boiler Overheat": "Wait for 15 minutes.\nTry again.",
+    "Controller Fault": "Follow machine restart procedure.\nIf problem persists, call service team.",
+    "Grinder Jammed": "Empty coffee grinder.\nClean hopper.\nRestart machine.\nTry again.\nIf issue persists, call service team.",
+    "Boiler Leak Detected": "Turn off machine.\nEmpty tank.\nCall service team.",
+    "Power Supply Failure": "Do not use machine.\nTurn off mains power.\nCall service team.",
+    "Door Lockout Engaged": "Check door latch.\nCheck for occlusions.\nRestart machine.",
+    "Dispense Pump Cavitation": "Turn off machine.\nRun coffee maintenance cycle twice.\nRetry.\nIf problem persists, call service team.",
+}
 
-header_fill = PatternFill("solid", fgColor="D9EAF7")
-header_font = Font(bold=True)
-for cell in worksheet[1]:
-    cell.fill = header_fill
-    cell.font = header_font
-    cell.alignment = Alignment(horizontal="center", vertical="center")
+models = ("All", "SC1x, SC3x", "SC2x", "SC2x, SC3x")
+column_widths = {
+    "A": 8.16, "B": 31, "C": 18, "E": 41.66, "F": 13.66,
+    "G": 27.66, "H": 13, "I": 14.16, "K": 17.33, "L": 18,
+    "M": 32.66, "N": 29.66,
+}
 
-for column_cells in worksheet.columns:
-    max_length = max(len(str(cell.value or "")) for cell in column_cells)
-    worksheet.column_dimensions[get_column_letter(column_cells[0].column)].width = max(18, min(max_length + 2, 60))
 
-for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=9):
-    for cell in row:
-        cell.alignment = Alignment(wrap_text=True, vertical="top")
+def _row_height(values):
+    """Estimate Excel's wrapped row height, capped like the reference workbook."""
+    widths = [column_widths.get(get_column_letter(i), 8.83) for i in range(1, 15)]
+    line_count = 1
+    for value, width in zip(values, widths):
+        text = "" if value is None else str(value)
+        wrapped = sum(max(1, (len(line) + max(1, int(width)) - 1) // max(1, int(width))) for line in text.split("\n"))
+        line_count = max(line_count, wrapped)
+    return min(96, max(48, line_count * 16))
 
-worksheet.freeze_panes = "A2"
-workbook.save("cashless_machine_alerts.xlsx")
-print(f"Created cashless_machine_alerts.xlsx with {len(alerts)} alerts.")
+
+def build_workbook():
+    workbook = Workbook()
+    worksheet = workbook.active
+    worksheet.title = "Alerts"
+    worksheet.append(headers)
+
+    first_update = date(2023, 12, 15)
+    for index, alert in enumerate(alerts, start=1):
+        last_update = first_update + timedelta(days=index - 1)
+        version_year = 2025 if alert["type"] == "Critical" else 2023
+        row = [
+            str(index),
+            alert["title"],
+            alert["type"],
+            alert["severity"],
+            alert["description"],
+            alert["component"],
+            operator_responses.get(alert["title"], ""),
+            models[(index - 1) // 19 % len(models)],
+            last_update,
+            f"DT 24.{version_year}.{index:02d}",
+            "",
+            "Yes" if alert["type"] == "Critical" else "",
+            alert["service"],
+            alert["technician"],
+        ]
+        worksheet.append(row)
+        worksheet.row_dimensions[worksheet.max_row].height = _row_height(row)
+
+    header_fill = PatternFill("solid", fgColor="D9EAF7")
+    header_font = Font(bold=True)
+    for cell in worksheet[1]:
+        cell.fill = header_fill
+        cell.font = header_font
+        cell.alignment = Alignment(horizontal="center", vertical="center")
+
+    for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=14):
+        for cell in row:
+            cell.alignment = Alignment(wrap_text=True, vertical="top")
+
+    for column, width in column_widths.items():
+        worksheet.column_dimensions[column].width = width
+
+    worksheet["A1"].number_format = "@"
+    for cell in worksheet["A"][1:]:
+        cell.number_format = "@"
+    for cell in worksheet["I"][1:]:
+        cell.number_format = "d-mmm-yy"
+
+    worksheet.freeze_panes = "A2"
+    worksheet.auto_filter.ref = f"A1:N{worksheet.max_row}"
+    worksheet.sheet_view.zoomScale = 150
+    return workbook
+
+
+def main():
+    parser = argparse.ArgumentParser(description="Generate the cashless machine alert catalogue.")
+    parser.add_argument("-o", "--output", default="cashless_machine_alerts.xlsx", help="Output .xlsx path")
+    args = parser.parse_args()
+    output = Path(args.output)
+    if "donotdelete" in output.name.lower():
+        parser.error("refusing to overwrite a DONOTDELETE reference workbook")
+    if output.suffix.lower() != ".xlsx":
+        parser.error("output must use the .xlsx extension")
+    output.parent.mkdir(parents=True, exist_ok=True)
+    build_workbook().save(output)
+    print(f"Created {output} with {len(alerts)} alerts.")
+
+
+if __name__ == "__main__":
+    main()

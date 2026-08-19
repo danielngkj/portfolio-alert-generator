@@ -1,0 +1,36 @@
+# Operating-system metadata
+.DS_Store
+._*
+Thumbs.db
+Desktop.ini
+
+# Python bytecode and local environments
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+venv/
+env/
+
+# Test, coverage, and tool caches
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Editor-specific settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Temporary Office files and generated verification artifacts
+~$*.xlsx
+outputs/
+
+# Temporary files and directories
+tmp/
+temp/
+*.tmp
+*.temp
