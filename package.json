@@ -4,10 +4,11 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "predev": "npm run generate:pdf",
+    "predev": "npm run generate:pdf && npm run publish:xlsx",
     "dev": "vite",
     "generate:pdf": "node scripts/generate-alerts-pdf.js",
-    "build": "npm run generate:pdf && vite build",
+    "publish:xlsx": "node scripts/publish-alerts-workbook.js",
+    "build": "npm run generate:pdf && npm run publish:xlsx && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

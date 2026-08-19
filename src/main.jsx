@@ -100,7 +100,7 @@ function SiteBanner({ onNavigate, currentPath }) {
       <nav aria-label="Site navigation">
         {resourceLink("/glossary", "Glossary")}
         {resourceLink("/sitemap", "Sitemap")}
-        {resourceLink("/about", "ABOUT", "nav-featured")}
+        {resourceLink("/about", "About this project", "nav-featured")}
         <a className="banner-download" href="/downloads/alert-atlas.pdf" download>
           <span className="pdf-mini-icon" aria-hidden="true">PDF</span> Download PDF
         </a>
@@ -270,7 +270,21 @@ function AlertTable({ alerts: tableAlerts, onOpen, sortConfig, onSort, query }) 
               className={alert.Type.toLowerCase()}
               tabIndex="0"
               aria-label={`Open alert ${alert.ID}: ${alert["Alert Title"]}`}
+              aria-describedby={`operator-tooltip-${alert.ID}-${index}`}
               onClick={() => onOpen(alert.ID)}
+              onMouseMove={(event) => {
+                const tooltip = event.currentTarget.querySelector(".operator-tooltip");
+                if (!tooltip) return;
+                const gap = 14;
+                const bounds = tooltip.getBoundingClientRect();
+                const left = Math.min(event.clientX + gap, window.innerWidth - bounds.width - 12);
+                const below = event.clientY + gap;
+                const top = below + bounds.height <= window.innerHeight - 12
+                  ? below
+                  : Math.max(12, event.clientY - bounds.height - gap);
+                tooltip.style.setProperty("--tooltip-left", `${Math.max(12, left)}px`);
+                tooltip.style.setProperty("--tooltip-top", `${top}px`);
+              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
@@ -282,8 +296,18 @@ function AlertTable({ alerts: tableAlerts, onOpen, sortConfig, onSort, query }) 
                 <div className="table-title-heading">
                   <span className="table-alert-id">{alert.ID}</span>
                   <strong><HighlightedText text={alert["Alert Title"]} query={query} /></strong>
+                  <span className="table-version">{alert.Version}</span>
                 </div>
                 <span className="table-description"><HighlightedText text={alert["Alert Description"]} query={query} /></span>
+                <span
+                  className="operator-tooltip"
+                  id={`operator-tooltip-${alert.ID}-${index}`}
+                  role="tooltip"
+                >
+                  <strong>Operator response</strong>
+                  <span className="operator-tooltip-date">Last updated {alert["Last Update"]}</span>
+                  <span className="operator-tooltip-response">{alert["Operator Response"] || "No operator action required."}</span>
+                </span>
               </td>
               <td className="status-cell">
                 <span
@@ -611,7 +635,7 @@ function AboutPage({ onNavigate, currentPath }) {
       <header className="group-page-header" id="main-content" tabIndex="-1">
         <span>Portfolio project</span>
         <h1 data-route-heading tabIndex="-1">About Alert atlas</h1>
-        <p>One structured source, turned into practical help for the web and print.</p>
+        <p>A portfolio showcase to show how I built and turned one structured source into help for web and print.</p>
       </header>
       <section className="pipeline-diagram" aria-labelledby="pipeline-title">
         <div className="pipeline-heading">
@@ -621,7 +645,13 @@ function AboutPage({ onNavigate, currentPath }) {
         <div className="pipeline-flow">
           <div className="pipeline-node">
             <span>Source</span>
-            <strong>Excel alert catalogue</strong>
+            <a
+              className="pipeline-source-link"
+              href="/downloads/alert-atlas-catalog.xlsx"
+              download
+            >
+              Excel alert catalogue <span aria-hidden="true">↓</span>
+            </a>
           </div>
           <span className="pipeline-arrow" aria-hidden="true">→</span>
           <div className="pipeline-node">
@@ -667,13 +697,33 @@ function AboutPage({ onNavigate, currentPath }) {
         </section>
         <section>
           <h2>How it was built</h2>
-          <p>React and Python support the Excel-to-JSON pipeline, website, and automated PDF. OpenAI Codex assisted development; the project owner set the direction, then reviewed, tested, and refined the work.</p>
+          <p>I designed the information architecture, alert taxonomy, data pipeline, interface, and accessibility behavior. OpenAI Codex assisted with implementation and iteration; I reviewed the generated work, tested the outputs, and made the final product decisions.</p>
+          <a
+            className="about-source-link"
+            href="https://github.com/danielngkj/portfolio-alert-generator"
+          >
+            View source on GitHub <span aria-hidden="true">↗</span>
+          </a>
         </section>
         <section>
           <h2>Fictional by design</h2>
           <p>ACME COFFEE, its models, alerts, and guidance are fictional. This content is not associated with a real manufacturer or intended for use with real equipment.</p>
         </section>
       </div>
+      <section className="project-resources" aria-labelledby="project-resources-title">
+        <div className="project-resources-copy">
+          <h2 id="project-resources-title">Project resources</h2>
+          <p>The downloadable Excel catalogue is the active source used to generate this website and PDF. Its synthetic text includes occasional intentional human-style errors for demonstration purposes.</p>
+        </div>
+        <div className="project-resource-links">
+          <a href="/downloads/alert-atlas-catalog.xlsx" download>
+            Download Excel catalogue <span aria-hidden="true">↓</span>
+          </a>
+          <a href="https://github.com/danielngkj/portfolio-alert-generator">
+            View source on GitHub <span aria-hidden="true">↗</span>
+          </a>
+        </div>
+      </section>
       <SiteFooter onNavigate={onNavigate} />
     </main>
   );

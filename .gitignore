@@ -47,6 +47,7 @@ data/generated/
 # Generated PDF publications
 output/pdf/
 public/downloads/*.pdf
+public/downloads/*.xlsx
 
 # Temporary files and directories
 tmp/

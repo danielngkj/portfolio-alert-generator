@@ -12,7 +12,11 @@ frontend JSON dataset and generating a synthetic Excel alert workbook.
 - `scripts/extract_alerts.py` converts the source workbook to JSON
 - `scripts/generate_alerts.py` creates a synthetic workbook programmatically
 - `scripts/generate-alerts-pdf.js` creates the downloadable alert handbook
+- `scripts/publish-alerts-workbook.js` copies the active workbook to the public download path
 - `src/` contains the React interface and CSS
+
+The active source workbook is `data/source/alerts-ds.xlsx`. During the build,
+it is published as `/downloads/alert-atlas-catalog.xlsx` for visitors.
 
 ## Requirements
 
@@ -63,6 +67,9 @@ column sizing based on the reference alert catalogue. Operator and service
 responses are formatted as practical bullet lists with contextual verification,
 logging, escalation, and return-to-service checks.
 
+Generated alert titles contain between two and five words. The deterministic
+Last Update schedule includes at least 15 records dated across 2025 and 2026.
+
 System areas are normalized to no more than 12 reusable values and organized
 under four major groups:
 
@@ -91,14 +98,15 @@ python scripts/generate_alerts.py --output path/to/alerts.xlsx
 
 The generator refuses to overwrite files whose names contain `DONOTDELETE`.
 
-### Generate response text with intentional human errors
+### Control intentional human errors
 
-Use the opt-in human-error mode to add occasional configured misspellings to
-Alert Description, Operator Response, Service Response, and Technician
-Response. Punctuation errors are limited to the three response columns:
+By default, generation adds occasional configured misspellings to Alert
+Description, Operator Response, Service Response, and Technician Response.
+Punctuation errors are limited to the three response columns. Generate a clean
+workbook explicitly with:
 
 ```bash
-python scripts/generate_alerts.py --human-errors
+python scripts/generate_alerts.py --no-human-errors
 ```
 
 The mode can omit some final full stops, insert double spaces after full stops,
@@ -110,7 +118,6 @@ result with:
 
 ```bash
 python scripts/generate_alerts.py \
-  --human-errors \
   --human-error-rate 0.25 \
   --human-error-seed 21
 ```
@@ -147,6 +154,7 @@ The React interface reads `data/alerts-ds.json` directly and provides:
 - Major-group tabs plus dependent system-area, type, severity, and individual model filters
 - A sitemap at `/sitemap`, subdivided into linkable major groups and system-area alert lists
 - An About page at `/about` describing the fictional portfolio context and development approach
+- About-page links for downloading the active Excel catalogue and viewing the GitHub source
 - Shared site navigation and data-version footer across catalogue and reference pages
 - Taxonomy breadcrumbs that return to a pre-filtered catalogue
 - Clickable table headers for ascending and descending column sorting
@@ -171,6 +179,17 @@ The handbook is generated automatically by `npm run build`, so the deployed
 download always reflects the current `data/alerts-ds.json` dataset. PDFKit is
 used as an MIT-licensed development dependency.
 
+The build also copies the active source workbook, `data/source/alerts-ds.xlsx`,
+to `public/downloads/alert-atlas-catalog.xlsx`. The deployed workbook is
+available at `/downloads/alert-atlas-catalog.xlsx` and is not committed as a
+separate generated copy.
+
+Publish only the workbook download copy with:
+
+```bash
+npm run publish:xlsx
+```
+
 ### Preview during development
 
 Install Node.js and npm, then install the project dependencies. You normally
@@ -187,8 +206,8 @@ Start the development server:
 npm run dev
 ```
 
-Starting the development server also regenerates the PDF handbook from the
-current JSON dataset.
+Starting the development server also regenerates the PDF handbook and publishes
+the active Excel workbook so both About-page downloads work locally.
 
 Vite prints the local address in the terminal, normally:
 
@@ -224,7 +243,7 @@ SPA fallback or rewrite rule.
 
 The repository includes `vercel.json` with the SPA rewrite, production build
 command, `dist` output directory, and sitewide no-index response header. Import
-the private GitHub repository into Vercel with these project settings:
+the GitHub repository into Vercel with these project settings:
 
 - Framework preset: Vite
 - Root directory: `.`
@@ -234,7 +253,8 @@ the private GitHub repository into Vercel with these project settings:
 - Environment variables: none required
 
 After deployment, verify `/about`, `/glossary`, `/sitemap`, a direct alert URL,
-and `/downloads/alert-atlas.pdf`. Also confirm responses include
+`/downloads/alert-atlas.pdf`, and `/downloads/alert-atlas-catalog.xlsx`. Also
+confirm the About-page GitHub link opens the repository and responses include
 `X-Robots-Tag: noindex, nofollow, noarchive`.
 
 ### Search indexing controls

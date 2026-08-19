@@ -21,7 +21,9 @@ The normal data flow is:
 2. `data/source/alerts-ds.xlsx` is the active source workbook used by extraction.
 3. `scripts/extract_alerts.py` generates `data/alerts-ds.json` for the site.
 4. `scripts/generate-alerts-pdf.js` generates the PDF handbook from that JSON.
-5. Vite builds the React site from the same JSON data.
+5. `scripts/publish-alerts-workbook.js` publishes the active workbook under the
+   public download filename.
+6. Vite builds the React site from the same JSON data.
 
 Do not manually edit `data/alerts-ds.json` when the change belongs in the Excel
 source or generator. Regenerate downstream artifacts instead. Only replace
@@ -80,10 +82,12 @@ npm run build
 
 - Always write `coffee machine` as two words without a hyphen, including when it
   modifies another noun.
+- Keep generated Alert Titles between two and five words, inclusive.
+- Keep at least 15 generated Last Update values dated across 2025 and 2026.
 - Alert IDs are text identifiers even when they contain only digits.
 - Keep Operator Response and Service Response guidance concise and actionable.
-- Human-error generation is opt-in. Do not add intentional errors to normal
-  output unless `--human-errors` is requested.
+- Human-error generation is enabled by default. Use `--no-human-errors` only
+  when clean output is explicitly requested.
 - Preserve the separation between Operator, Service, and Technician responses.
 
 ## Site conventions

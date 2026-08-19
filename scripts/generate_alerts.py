@@ -115,7 +115,7 @@ info_templates = [
         "technician": "Retain the diagnostic record and monitor for any future reader instability.",
     },
     {
-        "title": "Tank Temperature Stable",
+        "title": "Temperature Stable",
         "description": "Beverage tank temperature remains within the defined operating band.",
         "component": "Boiler and Tank Assembly",
         "service": "Temperature regulation is stable and no user-facing issue is present.",
@@ -375,7 +375,7 @@ critical_templates = [
 alerts = []
 
 
-def validate_alert_title(title, minimum_words=3, maximum_words=5):
+def validate_alert_title(title, minimum_words=2, maximum_words=5):
     """Keep generated titles within the compact range used by machine alerts."""
     word_count = len(re.findall(r"\b[\w'-]+\b", title))
     if not minimum_words <= word_count <= maximum_words:
@@ -462,6 +462,9 @@ operator_responses = {
     "Safety Door Lockout Engaged": "Check door latch.\nCheck for occlusions.\nRestart machine.",
     "Dispense Pump Cavitation Detected": "Turn off machine.\nRun coffee maintenance cycle twice.\nRetry.\nIf problem persists, call service team.",
 }
+
+RECENT_UPDATE_COUNT = 15
+RECENT_UPDATE_START = date(2025, 1, 15)
 
 OPERATOR_VERIFICATION_CHECKS = {
     "Control & Interface": (
@@ -578,7 +581,7 @@ def _row_height(values):
     return min(180, max(48, line_count * 16))
 
 
-def build_workbook(human_errors=False, human_error_rate=0.25, human_error_seed=21):
+def build_workbook(human_errors=True, human_error_rate=0.25, human_error_seed=21):
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = "Alerts"
@@ -586,8 +589,13 @@ def build_workbook(human_errors=False, human_error_rate=0.25, human_error_seed=2
     error_rng = random.Random(human_error_seed)
 
     first_update = date(2023, 12, 15)
+    recent_update_start_index = len(alerts) - RECENT_UPDATE_COUNT + 1
     for index, alert in enumerate(alerts, start=1):
-        last_update = first_update + timedelta(days=index - 1)
+        if index >= recent_update_start_index:
+            recent_offset = index - recent_update_start_index
+            last_update = RECENT_UPDATE_START + timedelta(days=30 * recent_offset)
+        else:
+            last_update = first_update + timedelta(days=index - 1)
         version_year = 2025 if alert["type"] == "Critical" else 2023
         description = alert["description"]
         operator_response = bullet_list(
@@ -659,8 +667,9 @@ def main():
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT, help="Output .xlsx path")
     parser.add_argument(
         "--human-errors",
-        action="store_true",
-        help="Add occasional intentional errors to response columns only",
+        action=argparse.BooleanOptionalAction,
+        default=True,
+        help="Add occasional intentional errors to response columns (default: enabled)",
     )
     parser.add_argument(
         "--human-error-rate",
