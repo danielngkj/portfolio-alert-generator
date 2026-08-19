@@ -1,7 +1,7 @@
-# ACME Alert Atlas
+# Alert atlas
 
-ACME Alert Atlas is a searchable React knowledge base for cashless coffee
-machine alerts. The repository also includes Python tools for extracting the
+Alert atlas is a searchable React knowledge base for a fictional industrial coffee
+machine. The repository also includes Python tools for extracting the
 frontend JSON dataset and generating a synthetic Excel alert workbook.
 
 ## Contents
@@ -11,6 +11,7 @@ frontend JSON dataset and generating a synthetic Excel alert workbook.
 - `data/reference/` contains the protected reference workbook
 - `scripts/extract_alerts.py` converts the source workbook to JSON
 - `scripts/generate_alerts.py` creates a synthetic workbook programmatically
+- `scripts/generate-alerts-pdf.js` creates the downloadable alert handbook
 - `src/` contains the React interface and CSS
 
 ## Requirements
@@ -46,7 +47,8 @@ Each row includes:
 - Type
 - Severity
 - Alert Description
-- Component
+- System Area
+- Major Group
 - Operator Response
 - Model
 - Last Update
@@ -57,7 +59,17 @@ Each row includes:
 - Technician Response
 
 The workbook also includes filtering, a frozen header row, wrapped content, and
-column sizing based on the reference alert catalogue.
+column sizing based on the reference alert catalogue. Operator and service
+responses are formatted as practical bullet lists with contextual verification,
+logging, escalation, and return-to-service checks.
+
+System areas are normalized to no more than 12 reusable values and organized
+under four major groups:
+
+- Control & Interface
+- Beverage Systems
+- Supply & Payment
+- Operations & Safety
 
 ## Regenerate the workbook
 
@@ -79,6 +91,33 @@ python scripts/generate_alerts.py --output path/to/alerts.xlsx
 
 The generator refuses to overwrite files whose names contain `DONOTDELETE`.
 
+### Generate response text with intentional human errors
+
+Use the opt-in human-error mode to add occasional configured misspellings to
+Alert Description, Operator Response, Service Response, and Technician
+Response. Punctuation errors are limited to the three response columns:
+
+```bash
+python scripts/generate_alerts.py --human-errors
+```
+
+The mode can omit some final full stops, insert double spaces after full stops,
+and introduce configured misspellings such as `maintenece`, `hopr`, `txn`,
+`prntr`, `ppr`, and `maschine`. All other workbook columns remain unchanged.
+
+Control how frequently errors are considered and reproduce a particular
+result with:
+
+```bash
+python scripts/generate_alerts.py \
+  --human-errors \
+  --human-error-rate 0.25 \
+  --human-error-seed 21
+```
+
+The error rate must be between `0.0` and `1.0`. Using the same rate and seed
+produces the same intentional errors each time.
+
 ## Extract the frontend data
 
 Regenerate `data/alerts-ds.json` from `data/source/alerts-ds.xlsx`:
@@ -88,8 +127,9 @@ python scripts/extract_alerts.py
 ```
 
 The JSON includes metadata with its UTC generation timestamp, source workbook
-timestamp, schema version, and record count. ACME Alert Atlas displays the
-generation timestamp in its header so the active data version is visible.
+timestamp, schema version, and record count. Alert atlas displays the
+generation timestamp in the shared site footer so the active data version is
+visible on every page.
 
 You can also provide custom paths:
 
@@ -97,17 +137,38 @@ You can also provide custom paths:
 python scripts/extract_alerts.py path/to/input.xlsx --output path/to/output.json
 ```
 
-## Browse ACME Alert Atlas
+## Browse Alert atlas
 
 The React interface reads `data/alerts-ds.json` directly and provides:
 
-- A compact, clickable alert table
+- A compact, clickable alert table with Alert, Status, and System Area columns
 - Exact Alert ID search for numeric queries
 - Text search that excludes the Last Update field
-- Type, severity, component, and individual model filters
-- Severity, last-updated, and title sorting
+- Major-group tabs plus dependent system-area, type, severity, and individual model filters
+- A sitemap at `/sitemap`, subdivided into linkable major groups and system-area alert lists
+- Shared site navigation and data-version footer across catalogue and reference pages
+- Taxonomy breadcrumbs that return to a pre-filtered catalogue
+- Clickable table headers for ascending and descending column sorting
+- Hero link to six recently updated alerts beneath the results table
 - Dedicated alert pages at `/<alert_id>`
+- A 10-term glossary at `/glossary` with directly linkable term anchors
+- Severity tooltips that reuse the glossary definition
+- Copy-link and print actions on individual alert pages
+- A compact PDF alert handbook generated from the same JSON data
 - Visible JSON generation timestamp and record counts
+- Keyboard focus management between SPA routes and a skip-to-content link
+
+### Generate the PDF handbook
+
+Generate `output/pdf/alert-atlas.pdf` and its site download copy:
+
+```bash
+npm run generate:pdf
+```
+
+The handbook is generated automatically by `npm run build`, so the deployed
+download always reflects the current `data/alerts-ds.json` dataset. PDFKit is
+used as an MIT-licensed development dependency.
 
 ### Preview during development
 
@@ -124,6 +185,9 @@ Start the development server:
 ```bash
 npm run dev
 ```
+
+Starting the development server also regenerates the PDF handbook from the
+current JSON dataset.
 
 Vite prints the local address in the terminal, normally:
 

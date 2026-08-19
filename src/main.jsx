@@ -1,20 +1,65 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import alertsData from "../data/alerts-ds.json";
 import "./styles.css";
 
 const ALL = "All";
 const MODEL_OPTIONS = ["SC1x", "SC2x", "SC3x"];
-const TYPE_ICONS = { Critical: "!", Warning: "▲", Informational: "i" };
+const MAJOR_GROUPS = ["Control & Interface", "Beverage Systems", "Supply & Payment", "Operations & Safety"];
+const TYPE_ICONS = { Critical: "", Warning: "", Informational: "" };
 const alerts = Array.isArray(alertsData) ? alertsData : alertsData.alerts;
 const dataGeneratedAt = Array.isArray(alertsData) ? null : alertsData.metadata?.generated_at;
 const SEARCH_FIELDS = [
-  "Alert Title", "Type", "Severity", "Alert Description", "Component",
+  "Alert Title", "Type", "Severity", "Alert Description", "System Area",
   "Operator Response", "Model", "Version", "Notes", "Critical Stop Response",
   "Service Response", "Technician Response",
 ];
-
+const GLOSSARY_TERMS = [
+  { term: "Alert", definition: "A machine event that communicates a condition, change, or fault requiring awareness or action." },
+  { term: "Severity", definition: "The impact level assigned to an alert, from Sev1 for the most urgent conditions to Sev5 for informational events." },
+  { term: "Informational", definition: "A normal operating event or status update that does not require corrective action." },
+  { term: "Warning", definition: "A condition that may affect service if it continues and should be monitored or addressed soon." },
+  { term: "Critical", definition: "A serious fault that can stop service, affect safety, or require immediate intervention." },
+  { term: "System Area", definition: "The functional area of the coffee machine associated with an alert, such as heating and boiler, payment, or dispensing." },
+  { term: "Model", definition: "The ACME coffee-machine family to which an alert applies, including SC1x, SC2x, and SC3x." },
+  { term: "Operator Response", definition: "The immediate action a site operator can take before escalating the alert to a service team." },
+  { term: "Service Response", definition: "A service-level explanation of the alert's operational impact and expected next step." },
+  { term: "Technician Response", definition: "Diagnostic or repair guidance intended for a trained coffee-machine technician." },
+];
+const SEVERITY_DEFINITION = GLOSSARY_TERMS.find(({ term }) => term === "Severity").definition;
+const TYPE_DEFINITIONS = Object.fromEntries(
+  Object.keys(TYPE_ICONS).map((type) => [
+    type,
+    GLOSSARY_TERMS.find(({ term }) => term === type).definition,
+  ]),
+);
 const severityOrder = { Sev1: 1, Sev2: 2, Sev3: 3, Sev4: 4, Sev5: 5 };
+const DEFAULT_VIEW_STATE = {
+  query: "",
+  type: ALL,
+  severity: ALL,
+  majorGroup: ALL,
+  systemArea: ALL,
+  model: ALL,
+  sortConfig: { field: "severity", direction: "asc" },
+};
+
+function loadViewState() {
+  try {
+    const stored = JSON.parse(sessionStorage.getItem("alert-atlas-view") || "{}");
+    const storedSort = stored.sortConfig?.field === "component"
+      ? { ...stored.sortConfig, field: "systemArea" }
+      : stored.sortConfig;
+    return {
+      ...DEFAULT_VIEW_STATE,
+      ...stored,
+      systemArea: stored.systemArea ?? stored.component ?? ALL,
+      sortConfig: storedSort ?? DEFAULT_VIEW_STATE.sortConfig,
+    };
+  } catch {
+    return DEFAULT_VIEW_STATE;
+  }
+}
 
 function formatTimestamp(timestamp) {
   if (!timestamp) return "Version unavailable";
@@ -22,6 +67,48 @@ function formatTimestamp(timestamp) {
     dateStyle: "medium",
     timeStyle: "short",
   }).format(new Date(timestamp));
+}
+
+function SiteBanner({ onNavigate, currentPath }) {
+  const resourceLink = (path, label) => (
+    <a
+      href={path}
+      aria-current={currentPath === path ? "page" : undefined}
+      onClick={(event) => { event.preventDefault(); onNavigate(path); }}
+    >{label}</a>
+  );
+  return (
+    <header className="site-banner">
+      <a className="skip-link" href="#main-content">Skip to main content</a>
+      <a className="site-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>
+        <span className="bean-icon" aria-hidden="true" />
+        <span><strong>ACME COFFEE</strong></span>
+      </a>
+      <nav aria-label="Site navigation">
+        {resourceLink("/glossary", "Glossary")}
+        {resourceLink("/sitemap", "Sitemap")}
+        <a className="banner-download" href="/downloads/alert-atlas.pdf" download>
+          <span className="pdf-mini-icon" aria-hidden="true">PDF</span> Download PDF
+        </a>
+      </nav>
+    </header>
+  );
+}
+
+function SiteFooter({ onNavigate }) {
+  return (
+    <footer className="site-footer">
+      <div>
+        <strong>Alert atlas</strong>
+        <span><span className="data-status" aria-hidden="true">●</span> Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
+      </div>
+      <nav aria-label="Footer navigation">
+        <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
+        <a href="/glossary" onClick={(event) => { event.preventDefault(); onNavigate("/glossary"); }}>Glossary</a>
+        <a href="/sitemap" onClick={(event) => { event.preventDefault(); onNavigate("/sitemap"); }}>Sitemap</a>
+      </nav>
+    </footer>
+  );
 }
 
 function uniqueValues(field) {
@@ -34,6 +121,19 @@ function matchesQuery(alert, query) {
   if (/^\d+$/.test(needle)) return alert.ID === needle;
   return SEARCH_FIELDS.some((field) =>
     String(alert[field] ?? "").toLowerCase().includes(needle));
+}
+
+function HighlightedText({ text, query }) {
+  const value = String(text ?? "");
+  const needle = query.trim();
+  if (!needle || /^\d+$/.test(needle)) return value;
+  const escapedNeedle = needle.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const parts = value.split(new RegExp(`(${escapedNeedle})`, "gi"));
+  return parts.map((part, index) => (
+    part.toLowerCase() === needle.toLowerCase()
+      ? <mark key={`${part}-${index}`}>{part}</mark>
+      : part
+  ));
 }
 
 function alertModels(alert) {
@@ -60,20 +160,91 @@ function SelectFilter({ label, value, options, onChange }) {
   );
 }
 
-function AlertTable({ alerts: tableAlerts, onOpen }) {
+function majorGroupSlug(group) {
+  return group.toLowerCase().replaceAll("&", "and").replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
+function GroupTabs({ value, onChange }) {
+  return (
+    <div className="group-tabs" aria-label="Filter by major group">
+      <div role="group" aria-label="Major groups">
+        {[ALL, ...MAJOR_GROUPS].map((group) => (
+          <button
+            key={group}
+            type="button"
+            className={value === group ? "active" : ""}
+            aria-pressed={value === group}
+            onClick={() => onChange(group)}
+          >
+            {group}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function SeverityBadge({ value }) {
+  return (
+    <span
+      className={`severity ${value.toLowerCase()}`}
+      tabIndex="0"
+      aria-label={`${value}. ${SEVERITY_DEFINITION}`}
+      data-tooltip={SEVERITY_DEFINITION}
+    >
+      S{value.replace(/^Sev/, "")}
+    </span>
+  );
+}
+
+function glossarySlug(term) {
+  return term.toLowerCase().replaceAll(" ", "-");
+}
+
+function GlossaryTerm({ term, children = term }) {
+  const definition = GLOSSARY_TERMS.find((entry) => entry.term === term)?.definition;
+  return (
+    <span
+      className="glossary-term-trigger"
+      tabIndex="0"
+      aria-label={`${children}: ${definition}`}
+      data-tooltip={definition}
+    >
+      {children}
+    </span>
+  );
+}
+
+function ResponseHeading({ term, icon }) {
+  return (
+    <div className="response-heading">
+      {icon && <span className="response-icon" aria-hidden="true">{icon}</span>}
+      <GlossaryTerm term={term} />
+    </div>
+  );
+}
+
+function SortableHeader({ field, label, sortConfig, onSort }) {
+  const active = sortConfig.field === field;
+  const direction = active ? sortConfig.direction : null;
+  return (
+    <th scope="col" aria-sort={active ? (direction === "asc" ? "ascending" : "descending") : "none"}>
+      <button className={active ? "active" : ""} onClick={() => onSort(field)}>
+        {label}<span className="sort-arrow" aria-hidden="true">{active ? (direction === "asc" ? "↑" : "↓") : "↕"}</span>
+      </button>
+    </th>
+  );
+}
+
+function AlertTable({ alerts: tableAlerts, onOpen, sortConfig, onSort, query }) {
   return (
     <div className="table-shell" aria-live="polite">
       <table className="alert-table">
         <thead>
           <tr>
-            <th scope="col">ID</th>
-            <th scope="col">Severity</th>
-            <th scope="col">Alert</th>
-            <th scope="col">Type</th>
-            <th scope="col">Component</th>
-            <th scope="col">Model</th>
-            <th scope="col">Last updated</th>
-            <th scope="col"><span className="sr-only">Open alert</span></th>
+            <SortableHeader field="id" label="Alert" sortConfig={sortConfig} onSort={onSort} />
+            <SortableHeader field="severity" label="Status" sortConfig={sortConfig} onSort={onSort} />
+            <SortableHeader field="systemArea" label="System Area" sortConfig={sortConfig} onSort={onSort} />
           </tr>
         </thead>
         <tbody>
@@ -91,27 +262,26 @@ function AlertTable({ alerts: tableAlerts, onOpen }) {
                 }
               }}
             >
-              <td className="table-id">{alert.ID}</td>
-              <td><span className={`severity ${alert.Severity.toLowerCase()}`}>{alert.Severity}</span></td>
               <td className="table-title">
-                <strong>{alert["Alert Title"]}</strong>
-                <span>{alert["Alert Description"]}</span>
+                <div className="table-title-heading">
+                  <span className="table-alert-id">{alert.ID}</span>
+                  <strong><HighlightedText text={alert["Alert Title"]} query={query} /></strong>
+                </div>
+                <span className="table-description"><HighlightedText text={alert["Alert Description"]} query={query} /></span>
               </td>
-              <td className="type-cell">
+              <td className="status-cell">
                 <span
                   className={`type-icon ${alert.Type.toLowerCase()}`}
                   role="img"
-                  aria-label={alert.Type}
-                  data-tooltip={alert.Type}
+                  aria-label={`${alert.Type}. ${TYPE_DEFINITIONS[alert.Type]}`}
+                  data-tooltip={TYPE_DEFINITIONS[alert.Type]}
                   tabIndex="0"
                 >
                   {TYPE_ICONS[alert.Type]}
                 </span>
+                <SeverityBadge value={alert.Severity} />
               </td>
-              <td>{alert.Component}</td>
-              <td>{alert.Model}</td>
-              <td>{alert["Last Update"]}</td>
-              <td className="row-arrow" aria-hidden="true">→</td>
+              <td>{alert["System Area"]}</td>
             </tr>
           ))}
         </tbody>
@@ -120,57 +290,315 @@ function AlertTable({ alerts: tableAlerts, onOpen }) {
   );
 }
 
-function AlertDetail({ alert, onBack }) {
+function RecentlyUpdated({ alerts: recentAlerts, onOpen }) {
+  return (
+    <section className="recent-section" id="recent-updates" aria-labelledby="recent-heading">
+      <div className="recent-heading">
+        <h2 id="recent-heading">Recently updated</h2>
+      </div>
+      <div className="recent-grid">
+        {recentAlerts.map((alert) => (
+          <a
+            href={`/${alert.ID}`}
+            key={alert.ID}
+            aria-label={`Alert ${alert.ID}: ${alert["Alert Title"]}, updated ${alert["Last Update"]}`}
+            aria-describedby={`recent-tooltip-${alert.ID}`}
+            onClick={(event) => {
+              event.preventDefault();
+              onOpen(alert.ID);
+            }}
+          >
+            <span
+              className={`type-icon ${alert.Type.toLowerCase()}`}
+              role="img"
+              aria-label={alert.Type}
+            >
+              {TYPE_ICONS[alert.Type]}
+            </span>
+            <span className="recent-copy">
+              <strong>{alert.ID}</strong>
+              <small>{alert["Last Update"]}</small>
+            </span>
+            <span className="recent-arrow" aria-hidden="true">→</span>
+            <span className="recent-tooltip" id={`recent-tooltip-${alert.ID}`} role="tooltip">
+              <strong>{alert["Alert Title"]}</strong>
+              <span>{alert["Alert Description"]}</span>
+            </span>
+          </a>
+        ))}
+      </div>
+    </section>
+  );
+}
+
+function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate, currentPath }) {
+  const [copyStatus, setCopyStatus] = useState("");
+
+  const copyText = async (text, successMessage) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopyStatus(successMessage);
+    } catch {
+      const input = document.createElement("textarea");
+      input.value = text;
+      input.style.position = "fixed";
+      input.style.opacity = "0";
+      document.body.appendChild(input);
+      input.select();
+      const copied = document.execCommand("copy");
+      input.remove();
+      setCopyStatus(copied ? successMessage : "Copy failed");
+    }
+    window.setTimeout(() => setCopyStatus(""), 1800);
+  };
+
+  const copyLink = () => copyText(window.location.href, "Link copied");
+
   if (!alert) {
     return (
       <main className="detail-shell">
+        <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
         <button className="back-link" onClick={onBack}>← Back to alerts</button>
-        <section className="empty-state">
-          <span>?</span><h1>Alert not found</h1>
+        <section className="empty-state" id="main-content" tabIndex="-1">
+          <span>?</span><h1 data-route-heading tabIndex="-1">Alert not found</h1>
           <p>The requested alert ID does not exist in this catalogue.</p>
           <button onClick={onBack}>Browse all alerts</button>
         </section>
+        <SiteFooter onNavigate={onNavigate} />
       </main>
     );
   }
 
   const response = alert["Operator Response"] || "No operator action required.";
+  const copyDetails = () => copyText([
+    `${alert.ID} - ${alert["Alert Title"]}`,
+    "",
+    "Operator Response:",
+    response,
+    "",
+    "Service Response:",
+    alert["Service Response"] || "—",
+    "",
+    "Technician Response:",
+    alert["Technician Response"] || "—",
+    "",
+    `URL: ${window.location.href}`,
+  ].join("\n"), "Details copied");
+  const relatedAlerts = alerts
+    .filter((candidate) => candidate.ID !== alert.ID)
+    .map((candidate) => ({
+      alert: candidate,
+      score: (candidate["System Area"] === alert["System Area"] ? 2 : 0) + (candidate.Model === alert.Model ? 1 : 0),
+    }))
+    .filter(({ score }) => score > 0)
+    .sort((left, right) => right.score - left.score || severityOrder[left.alert.Severity] - severityOrder[right.alert.Severity])
+    .slice(0, 4)
+    .map(({ alert: candidate }) => candidate);
+
   return (
     <main className="detail-shell">
-      <button className="back-link" onClick={onBack}>← Back to alerts</button>
-      <article className={`detail-card ${alert.Type.toLowerCase()}`}>
-        <div className="card-topline">
-          <span className={`severity ${alert.Severity.toLowerCase()}`}>{alert.Severity}</span>
-          <span className="alert-id">Alert {alert.ID}</span>
-          <span className="date">Updated {alert["Last Update"]}</span>
+      <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
+      <div className="detail-toolbar">
+        <button className="back-link" onClick={onBack}>← Back to alerts</button>
+        <div className="detail-actions">
+          <span className="copy-status" aria-live="polite">{copyStatus}</span>
+          <button onClick={copyDetails}>Copy alert details</button>
+          <button className="icon-action" onClick={copyLink} aria-label="Copy link" data-tooltip="Copy link">
+            <span aria-hidden="true">🔗︎</span>
+          </button>
+          <button className="icon-action" onClick={() => window.print()} aria-label="Print" data-tooltip="Print">
+            <span aria-hidden="true">⎙</span>
+          </button>
         </div>
-        <h1>{alert["Alert Title"]}</h1>
+      </div>
+      <article className={`detail-card ${alert.Type.toLowerCase()}`} id="main-content" tabIndex="-1">
+        <div className="card-topline">
+          <span className="alert-id">{alert.ID}</span>
+          <span className="card-meta-right">
+            <span className="date">Updated {alert["Last Update"]}</span>
+            <SeverityBadge value={alert.Severity} />
+          </span>
+        </div>
+        <div className="taxonomy-breadcrumb" aria-label="Alert taxonomy">
+          <a
+            href="/"
+            onClick={(event) => {
+              event.preventDefault();
+              onSelectTaxonomy(alert["Major Group"], ALL);
+            }}
+          >{alert["Major Group"]}</a>
+          <span aria-hidden="true">/</span>
+          <a
+            href="/"
+            onClick={(event) => {
+              event.preventDefault();
+              onSelectTaxonomy(alert["Major Group"], alert["System Area"]);
+            }}
+          >{alert["System Area"]}</a>
+        </div>
+        <h1 data-route-heading tabIndex="-1">{alert["Alert Title"]}</h1>
         <p className="detail-description">{alert["Alert Description"]}</p>
 
         <dl className="detail-metadata">
-          {["Type", "Component", "Model", "Version", "Critical Stop Response", "Notes"].map((field) => (
-            <div key={field}><dt>{field}</dt><dd>{alert[field] || "—"}</dd></div>
+          {["Type", "Model", "Version", "Critical Stop Response", "Notes"].map((field) => (
+            <div key={field} className={field === "Type" ? "type-metadata" : undefined}>
+              <dt>{["Type", "Model"].includes(field)
+                ? <GlossaryTerm term={field === "Type" ? alert.Type : field}>{field}</GlossaryTerm>
+                : field}</dt>
+              <dd
+                tabIndex={field === "Type" ? "0" : undefined}
+                aria-label={field === "Type" ? `${alert.Type}. ${TYPE_DEFINITIONS[alert.Type]}` : undefined}
+                data-tooltip={field === "Type" ? TYPE_DEFINITIONS[alert.Type] : undefined}
+              >
+                {alert[field] || "—"}
+              </dd>
+            </div>
           ))}
         </dl>
 
         <section className="detail-guidance">
-          <div className="operator-guidance"><span>Operator response</span><p>{response}</p></div>
-          <div><span>Service response</span><p>{alert["Service Response"] || "—"}</p></div>
-          <div><span>Technician response</span><p>{alert["Technician Response"] || "—"}</p></div>
+          <div><ResponseHeading term="Operator Response" /><p>{response}</p></div>
+          <div><ResponseHeading term="Service Response" /><p>{alert["Service Response"] || "—"}</p></div>
+          <div><ResponseHeading term="Technician Response" icon="🔧" /><p>{alert["Technician Response"] || "—"}</p></div>
         </section>
+
+        {relatedAlerts.length > 0 && (
+          <section className="related-alerts" aria-labelledby="related-alerts-heading">
+            <h2 id="related-alerts-heading">Related alerts</h2>
+            <ul className="related-links">
+              {relatedAlerts.map((related) => (
+                <li key={related.ID}>
+                  <a
+                    href={`/${related.ID}`}
+                    onClick={(event) => { event.preventDefault(); onOpenAlert(related.ID); }}
+                  >
+                    <strong>{related.ID}</strong>
+                    <span>{related["Alert Title"]}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </section>
+        )}
       </article>
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  );
+}
+
+function GlossaryPage({ onBack, onNavigate, currentPath }) {
+  return (
+    <main className="group-page-shell">
+      <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
+      <div className="detail-toolbar">
+        <button className="back-link" onClick={onBack}>← Back to alerts</button>
+      </div>
+      <header className="group-page-header" id="main-content" tabIndex="-1">
+        <span>Reference</span>
+        <h1 data-route-heading tabIndex="-1">Alert glossary</h1>
+        <p>Plain-language definitions for the terms used throughout Alert atlas.</p>
+      </header>
+      <section className="glossary-grid" aria-label="Glossary terms">
+        {GLOSSARY_TERMS.map(({ term, definition }, index) => {
+          const slug = glossarySlug(term);
+          return (
+            <article id={slug} key={term} className="glossary-term">
+              <span className="term-number">{String(index + 1).padStart(2, "0")}</span>
+              <div>
+                <h2>{term}<a href={`#${slug}`} aria-label={`Link to ${term}`}>#</a></h2>
+                <p>{definition}</p>
+              </div>
+            </article>
+          );
+        })}
+      </section>
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  );
+}
+
+function SitemapPage({ onBack, onOpenAlert, onNavigate, currentPath }) {
+  return (
+    <main className="group-page-shell" id="sitemap-top">
+      <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
+      <div className="detail-toolbar">
+        <button className="back-link" onClick={onBack}>← Back to alerts</button>
+      </div>
+      <header className="group-page-header" id="main-content" tabIndex="-1">
+        <span>Reference</span>
+        <h1 data-route-heading tabIndex="-1">Sitemap</h1>
+        <p>Browse all alerts by major group and system area.</p>
+      </header>
+      <nav className="sitemap-contents" aria-label="Sitemap contents">
+        {MAJOR_GROUPS.map((group) => <a key={group} href={`#${majorGroupSlug(group)}`}>{group}</a>)}
+      </nav>
+      <div className="sitemap-groups">
+        {MAJOR_GROUPS.map((group) => {
+          const groupAlerts = alerts.filter((alert) => alert["Major Group"] === group);
+          const systemAreas = [...new Set(groupAlerts.map((alert) => alert["System Area"]))].sort();
+          return (
+            <section key={group} id={majorGroupSlug(group)} className="sitemap-group">
+              <div className="sitemap-group-heading">
+                <h2>{group}</h2>
+                <span>{groupAlerts.length} alerts</span>
+              </div>
+              <div className="group-area-sections">
+                {systemAreas.map((area) => {
+                  const areaAlerts = groupAlerts.filter((alert) => alert["System Area"] === area);
+                  return (
+                    <section key={area} id={majorGroupSlug(area)} className="group-area-section" aria-labelledby={`area-${majorGroupSlug(area)}`}>
+                      <div className="group-area-heading">
+                        <h3 id={`area-${majorGroupSlug(area)}`}>
+                          <a href={`#${majorGroupSlug(area)}`}>{area}<span aria-hidden="true">#</span></a>
+                        </h3>
+                        <span>{areaAlerts.length} {areaAlerts.length === 1 ? "alert" : "alerts"}</span>
+                      </div>
+                      <ul>
+                        {areaAlerts.map((alert) => (
+                          <li key={alert.ID}>
+                            <a href={`/${alert.ID}`} onClick={(event) => { event.preventDefault(); onOpenAlert(alert.ID); }}>
+                              <strong>{alert.ID}</strong>
+                              <span
+                                className={`type-icon ${alert.Type.toLowerCase()}`}
+                                role="img"
+                                aria-label={`${alert.Type}. ${TYPE_DEFINITIONS[alert.Type]}`}
+                                data-tooltip={TYPE_DEFINITIONS[alert.Type]}
+                                tabIndex="0"
+                              >{TYPE_ICONS[alert.Type]}</span>
+                              <span>{alert["Alert Title"]}</span>
+                              <SeverityBadge value={alert.Severity} />
+                              <span className="group-alert-arrow" aria-hidden="true">→</span>
+                            </a>
+                          </li>
+                        ))}
+                      </ul>
+                    </section>
+                  );
+                })}
+              </div>
+              <a className="sitemap-back-top" href="#sitemap-top">Back to top ↑</a>
+            </section>
+          );
+        })}
+      </div>
+      <SiteFooter onNavigate={onNavigate} />
     </main>
   );
 }
 
 function App() {
+  const [initialViewState] = useState(loadViewState);
+  const controlsSentinelRef = useRef(null);
   const [path, setPath] = useState(window.location.pathname);
-  const [query, setQuery] = useState("");
-  const [type, setType] = useState(ALL);
-  const [severity, setSeverity] = useState(ALL);
-  const [component, setComponent] = useState(ALL);
-  const [model, setModel] = useState(ALL);
-  const [sort, setSort] = useState("severity");
+  const previousPathRef = useRef(path);
+  const [compactSearch, setCompactSearch] = useState(false);
+  const [query, setQuery] = useState(initialViewState.query);
+  const [type, setType] = useState(initialViewState.type);
+  const [severity, setSeverity] = useState(initialViewState.severity);
+  const [majorGroup, setMajorGroup] = useState(initialViewState.majorGroup);
+  const [systemArea, setSystemArea] = useState(initialViewState.systemArea);
+  const [model, setModel] = useState(initialViewState.model);
+  const [sortConfig, setSortConfig] = useState(initialViewState.sortConfig);
 
   useEffect(() => {
     const handlePopState = () => setPath(window.location.pathname);
@@ -178,123 +606,246 @@ function App() {
     return () => window.removeEventListener("popstate", handlePopState);
   }, []);
 
-  const alertId = decodeURIComponent(path.replace(/^\/+|\/+$/g, ""));
+  useEffect(() => {
+    if (previousPathRef.current === path) return undefined;
+    previousPathRef.current = path;
+    const focusFrame = window.requestAnimationFrame(() => {
+      document.querySelector("[data-route-heading]")?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(focusFrame);
+  }, [path]);
+
+  useEffect(() => {
+    sessionStorage.setItem("alert-atlas-view", JSON.stringify({
+      query, type, severity, majorGroup, systemArea, model, sortConfig,
+    }));
+  }, [query, type, severity, majorGroup, systemArea, model, sortConfig]);
+
+  useEffect(() => {
+    const sentinel = controlsSentinelRef.current;
+    if (!sentinel) {
+      setCompactSearch(false);
+      return undefined;
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => setCompactSearch(!entry.isIntersecting && entry.boundingClientRect.top < 10),
+      { rootMargin: "-10px 0px 0px" },
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [path]);
+
+  const route = decodeURIComponent(path.replace(/^\/+|\/+$/g, ""));
+  const isGlossary = route === "glossary";
+  const isSitemap = route === "sitemap";
+  const alertId = isGlossary || isSitemap ? "" : route;
   const selectedAlert = alertId ? alerts.find((alert) => alert.ID === alertId) : null;
 
   const navigate = (nextPath) => {
     window.history.pushState({}, "", nextPath);
-    setPath(nextPath);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    setPath(window.location.pathname);
+    if (window.location.hash) {
+      window.setTimeout(() => document.querySelector(window.location.hash)?.scrollIntoView({ behavior: "smooth" }), 0);
+    } else {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
   };
 
-  const componentOptions = useMemo(() => [...new Set(alerts
+  const navigateToTaxonomy = (nextGroup, nextSystemArea) => {
+    setMajorGroup(nextGroup);
+    setSystemArea(nextSystemArea);
+    navigate("/");
+  };
+
+  const systemAreaOptions = useMemo(() => [...new Set(alerts
     .filter((alert) => type === ALL || alert.Type === type)
     .filter((alert) => severity === ALL || alert.Severity === severity)
+    .filter((alert) => majorGroup === ALL || alert["Major Group"] === majorGroup)
     .filter((alert) => matchesModel(alert, model))
     .filter((alert) => matchesQuery(alert, query))
-    .map((alert) => alert.Component)
-    .filter(Boolean))].sort(), [query, type, severity, model]);
+    .map((alert) => alert["System Area"])
+    .filter(Boolean))].sort(), [query, type, severity, majorGroup, model]);
 
   useEffect(() => {
-    if (component !== ALL && !componentOptions.includes(component)) {
-      setComponent(ALL);
+    if (systemArea !== ALL && !systemAreaOptions.includes(systemArea)) {
+      setSystemArea(ALL);
     }
-  }, [component, componentOptions]);
+  }, [systemArea, systemAreaOptions]);
 
   const filteredAlerts = useMemo(() => {
+    const valueForSort = (alert) => {
+      switch (sortConfig.field) {
+        case "id": return Number(alert.ID);
+        case "severity": return severityOrder[alert.Severity];
+        case "title": return alert["Alert Title"];
+        case "type": return alert.Type;
+        case "systemArea": return alert["System Area"];
+        case "model": return alert.Model;
+        case "updated": return alert["Last Update"];
+        default: return alert["Alert Title"];
+      }
+    };
     return alerts
       .filter((alert) => type === ALL || alert.Type === type)
       .filter((alert) => severity === ALL || alert.Severity === severity)
-      .filter((alert) => component === ALL || alert.Component === component)
+      .filter((alert) => majorGroup === ALL || alert["Major Group"] === majorGroup)
+      .filter((alert) => systemArea === ALL || alert["System Area"] === systemArea)
       .filter((alert) => matchesModel(alert, model))
       .filter((alert) => matchesQuery(alert, query))
       .toSorted((a, b) => {
-        if (sort === "title") return a["Alert Title"].localeCompare(b["Alert Title"]);
-        if (sort === "updated") return b["Last Update"].localeCompare(a["Last Update"]);
-        return severityOrder[a.Severity] - severityOrder[b.Severity] || Number(a.ID) - Number(b.ID);
+        const aValue = valueForSort(a);
+        const bValue = valueForSort(b);
+        const comparison = typeof aValue === "number"
+          ? aValue - bValue
+          : String(aValue ?? "").localeCompare(String(bValue ?? ""));
+        return comparison * (sortConfig.direction === "asc" ? 1 : -1) || Number(a.ID) - Number(b.ID);
       });
-  }, [query, type, severity, component, model, sort]);
+  }, [query, type, severity, majorGroup, systemArea, model, sortConfig]);
+
+  const handleSort = (field) => {
+    setSortConfig((current) => ({
+      field,
+      direction: current.field === field
+        ? (current.direction === "asc" ? "desc" : "asc")
+        : (field === "updated" ? "desc" : "asc"),
+    }));
+  };
 
   const clearFilters = () => {
-    setQuery(""); setType(ALL); setSeverity(ALL); setComponent(ALL); setModel(ALL);
+    setQuery(""); setType(ALL); setSeverity(ALL); setMajorGroup(ALL); setSystemArea(ALL); setModel(ALL);
   };
-  const hasFilters = query || [type, severity, component, model].some((value) => value !== ALL);
+  const hasFilters = query.trim() || [type, severity, majorGroup, systemArea, model].some((value) => value !== ALL);
 
   const counts = alerts.reduce((result, alert) => {
     result[alert.Type] = (result[alert.Type] || 0) + 1;
     return result;
   }, {});
+  const recentAlerts = useMemo(() => alerts
+    .toSorted((a, b) => b["Last Update"].localeCompare(a["Last Update"]) || Number(b.ID) - Number(a.ID))
+    .slice(0, 6), []);
 
   useEffect(() => {
-    document.title = alertId && selectedAlert
-      ? `${selectedAlert["Alert Title"]} · ACME Alert Atlas`
-      : "ACME Alert Atlas";
-  }, [alertId, selectedAlert]);
+    document.title = isGlossary
+      ? "Glossary · Alert atlas"
+      : isSitemap
+        ? "Sitemap · Alert atlas"
+      : alertId && selectedAlert
+        ? `${selectedAlert["Alert Title"]} · Alert atlas`
+        : "Alert atlas";
+  }, [alertId, isGlossary, isSitemap, selectedAlert]);
+
+  if (isGlossary) {
+    return <GlossaryPage onBack={() => navigate("/")} onNavigate={navigate} currentPath={path} />;
+  }
+
+  if (isSitemap) {
+    return (
+      <SitemapPage
+        onBack={() => navigate("/")}
+        onOpenAlert={(id) => navigate(`/${id}`)}
+        onNavigate={navigate}
+        currentPath={path}
+      />
+    );
+  }
 
   if (alertId) {
-    return <AlertDetail alert={selectedAlert} onBack={() => navigate("/")} />;
+    return (
+      <AlertDetail
+        alert={selectedAlert}
+        onBack={() => navigate("/")}
+        onOpenAlert={(id) => navigate(`/${id}`)}
+        onSelectTaxonomy={navigateToTaxonomy}
+        onNavigate={navigate}
+        currentPath={path}
+      />
+    );
   }
 
   return (
     <main>
-      <header className="hero">
-        <div className="eyebrow"><span className="bean-icon" aria-hidden="true" /> Operations knowledge base</div>
+      <SiteBanner onNavigate={navigate} currentPath={path} />
+      <header className="hero" id="main-content" tabIndex="-1">
         <div className="hero-copy">
           <div>
-            <h1>ACME Alert Atlas</h1>
-            <p>Get every coffee machine back up and brewing—fast.</p>
+            <h1 data-route-heading tabIndex="-1">Help with your coffee machine</h1>
+            <p>Look up an alert and find out what to do next.</p>
           </div>
           <div className="summary" aria-label="Alert summary">
-            <strong>{alerts.length}</strong><span>Total alerts</span>
-            <strong>{counts.Critical}</strong><span>Critical</span>
-            <strong>{uniqueValues("Component").length}</strong><span>Components</span>
-            <strong className="data-status">●</strong><span>Data generated {formatTimestamp(dataGeneratedAt)}</span>
+            <div className="summary-stat"><strong>{alerts.length}</strong><span>Total alerts</span></div>
+            <div className="summary-stat"><strong>{counts.Critical}</strong><span>Critical</span></div>
+            <div className="summary-stat"><strong>{uniqueValues("System Area").length}</strong><span>System areas</span></div>
+            <a className="summary-link" href="#recent-updates">Recent updates <span aria-hidden="true">↓</span></a>
           </div>
         </div>
       </header>
 
-      <section className="controls" aria-label="Search and filter alerts">
+      <div className="controls-sentinel" ref={controlsSentinelRef} aria-hidden="true" />
+      <section className={`controls${compactSearch ? " compact" : ""}`} aria-label="Search and filter alerts">
         <label className="search-field">
           <span className="sr-only">Search alerts</span>
           <span className="search-icon" aria-hidden="true">⌕</span>
           <input
             type="search"
-            placeholder="Search titles, descriptions, components, responses…"
+            placeholder="Search titles, descriptions, system areas, responses…"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
           />
           {query && <button className="clear-query" onClick={() => setQuery("")} aria-label="Clear search">×</button>}
         </label>
+        <GroupTabs value={majorGroup} onChange={(group) => { setMajorGroup(group); setSystemArea(ALL); }} />
         <div className="filter-grid">
           <SelectFilter label="Type" value={type} options={uniqueValues("Type")} onChange={setType} />
           <SelectFilter label="Severity" value={severity} options={uniqueValues("Severity")} onChange={setSeverity} />
-          <SelectFilter label="Component" value={component} options={componentOptions} onChange={setComponent} />
+          <SelectFilter label="System Area" value={systemArea} options={systemAreaOptions} onChange={setSystemArea} />
           <SelectFilter label="Model" value={model} options={MODEL_OPTIONS} onChange={setModel} />
         </div>
       </section>
 
       <div className="results-bar">
-        <p><strong>{filteredAlerts.length}</strong> {filteredAlerts.length === 1 ? "alert" : "alerts"} found</p>
+        <p>
+          <strong>{filteredAlerts.length}</strong> {filteredAlerts.length === 1 ? "alert" : "alerts"}
+          {majorGroup === ALL ? " found" : <> in <strong>{majorGroup}</strong></>}
+        </p>
         <div>
-          {hasFilters && <button className="reset" onClick={clearFilters}>Clear filters</button>}
+          {hasFilters && <button className="reset" onClick={clearFilters}>Clear all filters</button>}
           <label className="sort-field">Sort by
-            <select value={sort} onChange={(event) => setSort(event.target.value)}>
+            <select
+              value={sortConfig.field}
+              onChange={(event) => setSortConfig({
+                field: event.target.value,
+                direction: event.target.value === "updated" ? "desc" : "asc",
+              })}
+            >
+              <option value="id">ID</option>
               <option value="severity">Severity</option>
               <option value="updated">Last updated</option>
               <option value="title">Title</option>
+              <option value="type">Type</option>
+              <option value="systemArea">System Area</option>
             </select>
           </label>
         </div>
       </div>
 
       {filteredAlerts.length ? (
-        <AlertTable alerts={filteredAlerts} onOpen={(id) => navigate(`/${id}`)} />
+        <AlertTable
+          alerts={filteredAlerts}
+          onOpen={(id) => navigate(`/${id}`)}
+          sortConfig={sortConfig}
+          onSort={handleSort}
+          query={query}
+        />
       ) : (
         <section className="empty-state">
           <span>0</span><h2>No alerts match</h2><p>Try a broader search or clear your filters.</p>
           <button onClick={clearFilters}>Show all alerts</button>
         </section>
       )}
+
+      <RecentlyUpdated alerts={recentAlerts} onOpen={(id) => navigate(`/${id}`)} />
+
+      <SiteFooter onNavigate={navigate} />
     </main>
   );
 }

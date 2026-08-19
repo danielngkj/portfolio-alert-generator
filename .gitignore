@@ -34,6 +34,10 @@ dist/
 outputs/
 data/generated/
 
+# Generated PDF publications
+output/pdf/
+public/downloads/*.pdf
+
 # Temporary files and directories
 tmp/
 temp/

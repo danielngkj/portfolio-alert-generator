@@ -1,6 +1,8 @@
 import argparse
 from datetime import date, timedelta
 from pathlib import Path
+import random
+import re
 
 from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
@@ -9,61 +11,64 @@ from openpyxl.utils import get_column_letter
 PROJECT_ROOT = Path(__file__).resolve().parent.parent
 DEFAULT_OUTPUT = PROJECT_ROOT / "data" / "generated" / "alerts-ds-generated.xlsx"
 
-taxonomy_map = {
-    "Control Board": "Control",
-    "Connectivity Module": "Control",
-    "Cleaning System": "Maintenance",
-    "Ingredient Hoppers": "Ingredients",
-    "Main Controller": "Control",
-    "Payment Terminal": "Payment",
-    "Boiler and Tank Assembly": "Brew",
+SYSTEM_AREA_GROUPS = {
+    "Machine Control": "Control & Interface",
+    "Connectivity": "Control & Interface",
+    "User Interface": "Control & Interface",
+    "Heating & Boiler": "Beverage Systems",
+    "Water": "Beverage Systems",
+    "Dispensing": "Beverage Systems",
+    "Ingredients": "Supply & Payment",
+    "Payment": "Supply & Payment",
+    "Cleaning & Waste": "Operations & Safety",
+    "Safety & Access": "Operations & Safety",
+    "Cooling": "Operations & Safety",
+    "Power": "Operations & Safety",
+}
+
+SYSTEM_AREA_ALIASES = {
+    "Control Board": "Machine Control",
+    "Main Controller": "Machine Control",
+    "Connectivity Module": "Connectivity",
+    "Network Interface": "Connectivity",
+    "Touchscreen Display": "User Interface",
+    "Receipt Printer": "User Interface",
+    "Boiler and Tank Assembly": "Heating & Boiler",
+    "Boiler Control": "Heating & Boiler",
+    "Boiler Chamber": "Heating & Boiler",
+    "Boiler and Heating Circuit": "Heating & Boiler",
     "Water Supply Line": "Water",
-    "Dispense Nozzle": "Brew",
-    "Door Interlock": "Safety",
-    "Payment Gateway Interface": "Payment",
-    "Receipt Printer": "Display",
+    "Water Tank": "Water",
+    "Water Reservoir": "Water",
+    "Dispense Nozzle": "Dispensing",
+    "Pump Motor": "Dispensing",
+    "Dispense Valve": "Dispensing",
+    "Cup Dispenser": "Dispensing",
+    "Pump Assembly": "Dispensing",
+    "Brew Group": "Dispensing",
+    "Coffee Grinder": "Dispensing",
+    "Dispense Pump": "Dispensing",
+    "Ingredient Hoppers": "Ingredients",
     "Bean Hopper": "Ingredients",
     "Milk Reservoir": "Ingredients",
-    "Water Tank": "Water",
-    "Card Reader": "Payment",
-    "Touchscreen Display": "Display",
-    "Drip Tray": "Maintenance",
-    "Pump Motor": "Brew",
-    "Dispense Valve": "Brew",
-    "Network Interface": "Control",
-    "Cup Dispenser": "Dispense",
-    "Service Scheduler": "Maintenance",
-    "Pump Assembly": "Brew",
-    "Payment Reader Board": "Payment",
-    "Brew Group": "Brew",
-    "Boiler Control": "Brew",
-    "Cooling Fan": "Cooling",
-    "Boiler Chamber": "Brew",
     "Milk Pump": "Ingredients",
+    "Payment Terminal": "Payment",
+    "Payment Gateway Interface": "Payment",
+    "Card Reader": "Payment",
+    "Payment Reader Board": "Payment",
+    "Cleaning System": "Cleaning & Waste",
+    "Drip Tray": "Cleaning & Waste",
+    "Service Scheduler": "Cleaning & Waste",
+    "Door Interlock": "Safety & Access",
+    "Cooling Fan": "Cooling",
     "Power Supply Unit": "Power",
-    "Coffee Grinder": "Brew",
-    "Water Reservoir": "Water",
-    "Boiler and Heating Circuit": "Brew",
-    "Customer Interface": "Display",
-    "Electrical System": "Power",
-    "Thermal Management": "Cooling",
-    "Safety & Access": "Safety",
-    "Beverage Handling": "Dispense",
-    "Ingredient Handling": "Ingredients",
-    "Water System": "Water",
-    "Beverage Preparation": "Brew",
-    "Machine Control": "Control",
-    "Maintenance": "Maintenance",
-    "Cashless Payment": "Payment",
-    "Display": "Display",
-    "Cooling": "Cooling",
-    "Power": "Power",
-    "Safety": "Safety",
-    "Dispense": "Dispense",
-    "Ingredients": "Ingredients",
-    "Water": "Water",
-    "Brew": "Brew",
 }
+
+
+def system_area_taxonomy(component):
+    """Return the canonical system area and its major organizational group."""
+    system_area = SYSTEM_AREA_ALIASES[component]
+    return system_area, SYSTEM_AREA_GROUPS[system_area]
 
 
 info_templates = [
@@ -370,37 +375,40 @@ critical_templates = [
 alerts = []
 for idx in range(19):
     template = info_templates[idx % len(info_templates)]
+    system_area, group = system_area_taxonomy(template["component"])
     alerts.append({
         "type": "Informational",
         "severity": "Sev5",
         "title": template["title"],
         "description": template["description"],
-        "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Control"),
+        "system_area": system_area,
+        "group": group,
         "service": template["service"],
         "technician": template["technician"],
     })
 for idx in range(40):
     template = warning_templates[idx % len(warning_templates)]
+    system_area, group = system_area_taxonomy(template["component"])
     alerts.append({
         "type": "Warning",
         "severity": template["severity"],
         "title": template["title"],
         "description": template["description"],
-        "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Control"),
+        "system_area": system_area,
+        "group": group,
         "service": template["service"],
         "technician": template["technician"],
     })
 for idx in range(16):
     template = critical_templates[idx % len(critical_templates)]
+    system_area, group = system_area_taxonomy(template["component"])
     alerts.append({
         "type": "Critical",
         "severity": template["severity"],
         "title": template["title"],
         "description": template["description"],
-        "component": template["component"],
-        "collection": taxonomy_map.get(template["component"], "Control"),
+        "system_area": system_area,
+        "group": group,
         "service": template["service"],
         "technician": template["technician"],
     })
@@ -411,7 +419,8 @@ headers = [
     "Type",
     "Severity",
     "Alert Description",
-    "Component",
+    "System Area",
+    "Major Group",
     "Operator Response",
     "Model",
     "Last Update",
@@ -439,50 +448,166 @@ operator_responses = {
     "Dispense Pump Cavitation": "Turn off machine.\nRun coffee maintenance cycle twice.\nRetry.\nIf problem persists, call service team.",
 }
 
-models = ("All", "SC1x, SC3x", "SC2x", "SC2x, SC3x")
-column_widths = {
-    "A": 8.16, "B": 31, "C": 18, "E": 41.66, "F": 13.66,
-    "G": 27.66, "H": 13, "I": 14.16, "K": 17.33, "L": 18,
-    "M": 32.66, "N": 29.66,
+OPERATOR_VERIFICATION_CHECKS = {
+    "Control & Interface": (
+        "Confirm the display and status indicators match the alert condition.",
+        "Retry the affected operation once and note the result.",
+        "Record any visible error code before escalating the issue.",
+    ),
+    "Beverage Systems": (
+        "Check for visible leaks, blockages, or unusual noise.",
+        "Run one safe test cycle and confirm the expected flow.",
+        "Keep the affected beverage unavailable if the check fails.",
+    ),
+    "Supply & Payment": (
+        "Confirm stock levels or payment connectivity at the machine.",
+        "Perform one test transaction or dispense check where safe.",
+        "Record the outcome and escalate if normal operation is not restored.",
+    ),
+    "Operations & Safety": (
+        "Inspect the surrounding area for an immediate safety concern.",
+        "Confirm doors, trays, vents, and access panels are correctly seated.",
+        "Keep the machine out of service if the alert remains active.",
+    ),
+}
+
+SERVICE_VERIFICATION_CHECKS = {
+    "Control & Interface": (
+        "Review the event log and confirm the alert timestamp.",
+        "Verify communication, display, and controller health checks pass.",
+        "Document the result before closing or escalating the service case.",
+    ),
+    "Beverage Systems": (
+        "Inspect the relevant water, heating, and dispense path.",
+        "Complete a controlled test cycle and compare readings with specification.",
+        "Confirm there are no leaks or recurring faults before return to service.",
+    ),
+    "Supply & Payment": (
+        "Verify supply levels, sensors, connections, and peripheral status.",
+        "Complete a test transaction or product cycle as applicable.",
+        "Confirm counters and monitoring data update correctly after the test.",
+    ),
+    "Operations & Safety": (
+        "Inspect safety interlocks, ventilation, power, and service access points.",
+        "Clear the alert only after the relevant verification check passes.",
+        "Record corrective action and confirm the machine is safe to operate.",
+    ),
 }
 
 
+def bullet_list(primary_response, additional_items, default_response):
+    """Format an existing response and three supporting checks as bullets."""
+    primary_items = [line.strip() for line in primary_response.splitlines() if line.strip()]
+    if not primary_items:
+        primary_items = [default_response]
+    return "\n".join(f"• {item}" for item in (*primary_items, *additional_items))
+
+models = ("All", "SC1x, SC3x", "SC2x", "SC2x, SC3x")
+column_widths = {
+    "A": 8.16, "B": 31, "C": 18, "E": 41.66, "F": 13.66,
+    "G": 21, "H": 27.66, "I": 13, "J": 14.16, "L": 17.33,
+    "M": 18, "N": 32.66, "O": 29.66,
+}
+
+HUMAN_ERROR_REPLACEMENTS = {
+    "maintenance": "maintenece",
+    "hopper": "hopr",
+    "transaction": "txn",
+    "printer": "prntr",
+    "paper": "ppr",
+    "machine": "maschine",
+}
+
+
+def add_misspellings(text, rng, error_rate=0.25):
+    """Add occasional configured misspellings to a string."""
+    if not text:
+        return text
+
+    result = text
+    for correct, typo in HUMAN_ERROR_REPLACEMENTS.items():
+        pattern = rf"\b{correct}\b"
+        if re.search(pattern, result, flags=re.IGNORECASE) and rng.random() < error_rate:
+            result = re.sub(
+                pattern,
+                lambda match: typo.capitalize() if match.group(0)[0].isupper() else typo,
+                result,
+                flags=re.IGNORECASE,
+            )
+    return result
+
+
+def add_human_errors(text, rng, error_rate=0.25):
+    """Add occasional misspellings and punctuation errors to a response string."""
+    if not text:
+        return text
+
+    result = add_misspellings(text, rng, error_rate)
+
+    if rng.random() < error_rate:
+        result = re.sub(r"\. (?=\S)", ".  ", result)
+        result = result.replace(".\n", ".  \n")
+    if result.endswith(".") and rng.random() < error_rate:
+        result = result[:-1]
+    return result
+
+
 def _row_height(values):
-    """Estimate Excel's wrapped row height, capped like the reference workbook."""
-    widths = [column_widths.get(get_column_letter(i), 8.83) for i in range(1, 15)]
+    """Estimate Excel's wrapped row height while allowing multi-step responses."""
+    widths = [column_widths.get(get_column_letter(i), 8.83) for i in range(1, len(headers) + 1)]
     line_count = 1
     for value, width in zip(values, widths):
         text = "" if value is None else str(value)
         wrapped = sum(max(1, (len(line) + max(1, int(width)) - 1) // max(1, int(width))) for line in text.split("\n"))
         line_count = max(line_count, wrapped)
-    return min(96, max(48, line_count * 16))
+    return min(180, max(48, line_count * 16))
 
 
-def build_workbook():
+def build_workbook(human_errors=False, human_error_rate=0.25, human_error_seed=21):
     workbook = Workbook()
     worksheet = workbook.active
     worksheet.title = "Alerts"
     worksheet.append(headers)
+    error_rng = random.Random(human_error_seed)
 
     first_update = date(2023, 12, 15)
     for index, alert in enumerate(alerts, start=1):
         last_update = first_update + timedelta(days=index - 1)
         version_year = 2025 if alert["type"] == "Critical" else 2023
+        description = alert["description"]
+        operator_response = bullet_list(
+            operator_responses.get(alert["title"], ""),
+            OPERATOR_VERIFICATION_CHECKS[alert["group"]],
+            "No immediate operator action is required; continue monitoring the machine.",
+        )
+        service_response = bullet_list(
+            alert["service"],
+            SERVICE_VERIFICATION_CHECKS[alert["group"]],
+            "Review the alert and confirm the machine state.",
+        )
+        technician_response = alert["technician"]
+        if human_errors:
+            description = add_misspellings(description, error_rng, human_error_rate)
+            operator_response = add_human_errors(operator_response, error_rng, human_error_rate)
+            service_response = add_human_errors(service_response, error_rng, human_error_rate)
+            technician_response = add_human_errors(technician_response, error_rng, human_error_rate)
+
         row = [
             str(index),
             alert["title"],
             alert["type"],
             alert["severity"],
-            alert["description"],
-            alert["component"],
-            operator_responses.get(alert["title"], ""),
+            description,
+            alert["system_area"],
+            alert["group"],
+            operator_response,
             models[(index - 1) // 19 % len(models)],
             last_update,
             f"DT 24.{version_year}.{index:02d}",
             "",
             "Yes" if alert["type"] == "Critical" else "",
-            alert["service"],
-            alert["technician"],
+            service_response,
+            technician_response,
         ]
         worksheet.append(row)
         worksheet.row_dimensions[worksheet.max_row].height = _row_height(row)
@@ -494,7 +619,7 @@ def build_workbook():
         cell.font = header_font
         cell.alignment = Alignment(horizontal="center", vertical="center")
 
-    for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=14):
+    for row in worksheet.iter_rows(min_row=2, max_row=worksheet.max_row, min_col=1, max_col=len(headers)):
         for cell in row:
             cell.alignment = Alignment(wrap_text=True, vertical="top")
 
@@ -504,11 +629,12 @@ def build_workbook():
     worksheet["A1"].number_format = "@"
     for cell in worksheet["A"][1:]:
         cell.number_format = "@"
-    for cell in worksheet["I"][1:]:
+    for cell in worksheet["J"][1:]:
         cell.number_format = "d-mmm-yy"
 
     worksheet.freeze_panes = "A2"
-    worksheet.auto_filter.ref = f"A1:N{worksheet.max_row}"
+    last_column = get_column_letter(len(headers))
+    worksheet.auto_filter.ref = f"A1:{last_column}{worksheet.max_row}"
     worksheet.sheet_view.zoomScale = 150
     return workbook
 
@@ -516,15 +642,41 @@ def build_workbook():
 def main():
     parser = argparse.ArgumentParser(description="Generate the cashless machine alert catalogue.")
     parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT, help="Output .xlsx path")
+    parser.add_argument(
+        "--human-errors",
+        action="store_true",
+        help="Add occasional intentional errors to response columns only",
+    )
+    parser.add_argument(
+        "--human-error-rate",
+        type=float,
+        default=0.25,
+        metavar="RATE",
+        help="Probability of each possible response error (0.0 to 1.0; default: 0.25)",
+    )
+    parser.add_argument(
+        "--human-error-seed",
+        type=int,
+        default=21,
+        metavar="SEED",
+        help="Random seed for reproducible intentional errors (default: 21)",
+    )
     args = parser.parse_args()
     output = args.output
     if "donotdelete" in output.name.lower():
         parser.error("refusing to overwrite a DONOTDELETE reference workbook")
     if output.suffix.lower() != ".xlsx":
         parser.error("output must use the .xlsx extension")
+    if not 0.0 <= args.human_error_rate <= 1.0:
+        parser.error("--human-error-rate must be between 0.0 and 1.0")
     output.parent.mkdir(parents=True, exist_ok=True)
-    build_workbook().save(output)
-    print(f"Created {output} with {len(alerts)} alerts.")
+    build_workbook(
+        human_errors=args.human_errors,
+        human_error_rate=args.human_error_rate,
+        human_error_seed=args.human_error_seed,
+    ).save(output)
+    mode = " with intentional human errors" if args.human_errors else ""
+    print(f"Created {output} with {len(alerts)} alerts{mode}.")
 
 
 if __name__ == "__main__":

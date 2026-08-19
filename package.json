@@ -4,8 +4,10 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
+    "predev": "npm run generate:pdf",
     "dev": "vite",
-    "build": "vite build",
+    "generate:pdf": "node scripts/generate-alerts-pdf.js",
+    "build": "npm run generate:pdf && vite build",
     "preview": "vite preview"
   },
   "dependencies": {
@@ -14,6 +16,7 @@
   },
   "devDependencies": {
     "@vitejs/plugin-react": "4.7.0",
+    "pdfkit": "^0.19.1",
     "vite": "6.4.3"
   }
 }
