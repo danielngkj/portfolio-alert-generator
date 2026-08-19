@@ -60,9 +60,9 @@ function handbookDate(timestamp) {
 function drawRunningHeader() {
   doc.save();
   doc.font("Helvetica-Bold").fontSize(7.5).fillColor(colors.brand)
-    .text("ACME ALERT ATLAS", margin, 24, { characterSpacing: 0.8, lineBreak: false });
+    .text("ACME COFFEE", margin, 24, { characterSpacing: 0.8, lineBreak: false });
   doc.font("Helvetica").fillColor(colors.muted)
-    .text("OPERATIONS HANDBOOK", 400, 24, { width: 157, align: "right", lineBreak: false });
+    .text("ALERT ATLAS HANDBOOK", 400, 24, { width: 157, align: "right", lineBreak: false });
   doc.strokeColor(colors.line).lineWidth(0.5).moveTo(margin, 36).lineTo(557, 36).stroke();
   doc.restore();
   doc.x = margin;
@@ -74,8 +74,11 @@ function drawPageFooter() {
   doc.page.margins.bottom = 0;
   doc.strokeColor(colors.line).lineWidth(0.4).moveTo(margin, 808).lineTo(557, 808).stroke();
   doc.font("Helvetica").fontSize(7.5).fillColor(colors.muted)
-    .text(`Alert atlas  |  Page ${pageNumber}`, margin, 817, {
-      width: 519, align: "right", lineBreak: false,
+    .text("FICTIONAL DEMONSTRATION - NOT FOR OPERATIONAL USE", margin, 817, {
+      width: 330, align: "left", lineBreak: false,
+    });
+  doc.text(`Alert atlas  |  Page ${pageNumber}`, 370, 817, {
+      width: 187, align: "right", lineBreak: false,
     });
   doc.page.margins.bottom = originalBottomMargin;
   doc.x = margin;
@@ -163,6 +166,10 @@ doc.fillColor("#ffffff").font("Helvetica-Bold").fontSize(25)
   .text(String(alerts.length), margin, 280);
 doc.fillColor("#beb8b4").font("Helvetica").fontSize(9)
   .text("ALERTS", margin, 312, { characterSpacing: 1.2 });
+doc.fillColor("#d7d1cc").fontSize(9)
+  .text("FICTIONAL PORTFOLIO DEMONSTRATION - NOT FOR OPERATIONAL USE", margin, 660, {
+    width: 519, characterSpacing: 0.5,
+  });
 doc.fillColor("#d7d1cc").fontSize(9)
   .text(`Dataset generated ${handbookDate(generatedAt)}`, margin, 720);
 doc.text("Generated from data/alerts-ds.json", margin, 738);

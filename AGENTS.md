@@ -3,7 +3,7 @@
 ## Purpose
 
 This repository builds Alert atlas, a React knowledge base for synthetic ACME
-coffee-machine alerts. It also contains the tools that generate the Excel alert
+coffee machine alerts. It also contains the tools that generate the Excel alert
 catalogue, extract the frontend JSON dataset, and publish the PDF handbook.
 
 ## Protected reference workbook
@@ -78,6 +78,8 @@ npm run build
 
 ## Content conventions
 
+- Always write `coffee machine` as two words without a hyphen, including when it
+  modifies another noun.
 - Alert IDs are text identifiers even when they contain only digits.
 - Keep Operator Response and Service Response guidance concise and actionable.
 - Human-error generation is opt-in. Do not add intentional errors to normal
@@ -90,6 +92,8 @@ npm run build
   catalogue, alert details, Glossary, Sitemap, and not-found views.
 - Preserve direct alert URLs in the form `/<alert_id>`.
 - Preserve the `/glossary` and `/sitemap` routes and linkable Sitemap anchors.
+- Preserve the `/about` route and its fictional-data and Codex-assistance disclosure.
+- Keep the fictional-data notice visible in every site footer and PDF page.
 - Configure static hosting with an SPA fallback to `index.html`.
 - Prefer compact tables and reference lists over card-heavy layouts.
 - Keep Major Group navigation broad and System Area information specific.

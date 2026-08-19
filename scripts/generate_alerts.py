@@ -73,42 +73,42 @@ def system_area_taxonomy(component):
 
 info_templates = [
     {
-        "title": "Startup Complete",
+        "title": "Machine Startup Complete",
         "description": "Machine completed a normal startup sequence without faults.",
         "component": "Control Board",
         "service": "No service action required; the machine is operating within normal parameters.",
         "technician": "Log the event and confirm normal startup values remain stable across the next operating cycle.",
     },
     {
-        "title": "Heartbeat Confirmed",
+        "title": "Backend Heartbeat Confirmed",
         "description": "The device is successfully reporting to the service backend.",
         "component": "Connectivity Module",
         "service": "Remote monitoring connection is healthy and no intervention is needed.",
         "technician": "Review heartbeat timestamps and confirm they are within the expected interval for this site.",
     },
     {
-        "title": "Scheduled Cleaning Logged",
+        "title": "Scheduled Cleaning Cycle Logged",
         "description": "The maintenance cleaning cycle completed without interruption.",
         "component": "Cleaning System",
         "service": "Cleaning cycle completed successfully and the unit remained in service.",
         "technician": "Verify the cleaning log and confirm the next maintenance cycle is scheduled correctly.",
     },
     {
-        "title": "Inventory Balanced",
+        "title": "Ingredient Inventory Balanced OK",
         "description": "Ingredient and product inventory status is within expected limits.",
         "component": "Ingredient Hoppers",
         "service": "Inventory counts are aligned with the machine configuration and no refill is needed.",
         "technician": "Cross-check inventory counters against the physical stock levels for reporting accuracy.",
     },
     {
-        "title": "Firmware Check Passed",
+        "title": "Firmware Version Check Passed",
         "description": "Current firmware version matches the approved release.",
         "component": "Main Controller",
         "service": "No patch or rollback is required at this time.",
         "technician": "Archive the firmware record and validate version alignment against the approved release list.",
     },
     {
-        "title": "Payment Self-Test OK",
+        "title": "Payment Self Test Completed OK",
         "description": "The cashless payment reader completed its self-diagnostic routine successfully.",
         "component": "Payment Terminal",
         "service": "Cashless device is fit for customer transactions and no service response is needed.",
@@ -122,35 +122,35 @@ info_templates = [
         "technician": "Check the last thermal trend and confirm no drift is emerging from previous service activity.",
     },
     {
-        "title": "Water Quality Normal",
+        "title": "Water Quality Reading Normal",
         "description": "Water quality readings are within the expected operational range.",
         "component": "Water Supply Line",
         "service": "Water conditions are acceptable and no service escalation is necessary.",
         "technician": "Note the water quality trend for reference during the next preventive inspection.",
     },
     {
-        "title": "Nozzle Purge Successful",
+        "title": "Nozzle Purge Cycle Successful",
         "description": "The dispense nozzle purge cycle completed without blockage or abnormal flow.",
         "component": "Dispense Nozzle",
         "service": "The purge cycle completed successfully and the machine remains ready for service.",
         "technician": "Log the nozzle purge outcome and confirm flow metrics remain within expected values.",
     },
     {
-        "title": "Door Sensor Normal",
+        "title": "Door Sensor State Normal",
         "description": "Door interlock and access sensors are in the normal state.",
         "component": "Door Interlock",
         "service": "No security or access event is active and the machine is operating as expected.",
         "technician": "Monitor sensor state during the next operating cycle to confirm the latch remains stable.",
     },
     {
-        "title": "Transaction Completed",
+        "title": "Payment Transaction Completed OK",
         "description": "A recent customer transaction ended normally with no duplicate settlement event.",
         "component": "Payment Gateway Interface",
         "service": "The transaction lifecycle completed correctly with no response anomaly.",
         "technician": "Confirm settlement logs match the backend report and archive the transaction record.",
     },
     {
-        "title": "Receipt Queue Cleared",
+        "title": "Receipt Printer Queue Cleared",
         "description": "Receipt printing queue is empty and journal activity is normal.",
         "component": "Receipt Printer",
         "service": "Printer queue was cleared successfully and no paper or jam issue is present.",
@@ -160,7 +160,7 @@ info_templates = [
 
 warning_templates = [
     {
-        "title": "Low Bean Hopper",
+        "title": "Bean Hopper Level Low",
         "description": "The coffee bean hopper level is approaching the minimum threshold for continuous service.",
         "component": "Bean Hopper",
         "severity": "Sev4",
@@ -168,7 +168,7 @@ warning_templates = [
         "technician": "Top up the hopper and confirm the level sensor reads correctly after refill.",
     },
     {
-        "title": "Milk Tank Below Target",
+        "title": "Milk Tank Below Refill Target",
         "description": "Milk inventory is beneath the preferred refill limit but the machine remains operational.",
         "component": "Milk Reservoir",
         "severity": "Sev4",
@@ -176,7 +176,7 @@ warning_templates = [
         "technician": "Refill the container and recalibrate the float sensor if the reading remains offset.",
     },
     {
-        "title": "Water Level Warning",
+        "title": "Water Tank Level Warning",
         "description": "The water tank is nearing the low-level threshold and may require replenishment soon.",
         "component": "Water Tank",
         "severity": "Sev4",
@@ -192,7 +192,7 @@ warning_templates = [
         "technician": "Clean the reader slot and verify contactless and contact reads are consistently accepted.",
     },
     {
-        "title": "Touchscreen Response Slow",
+        "title": "Touchscreen Response Running Slow",
         "description": "The HMI touch panel is responding slower than the expected baseline.",
         "component": "Touchscreen Display",
         "severity": "Sev4",
@@ -200,7 +200,7 @@ warning_templates = [
         "technician": "Clean the panel and recalibrate the touch matrix to restore expected response speed.",
     },
     {
-        "title": "Drip Tray Almost Full",
+        "title": "Drip Tray Nearly Full",
         "description": "The drip tray sensor reports the tray level approaching the service threshold.",
         "component": "Drip Tray",
         "severity": "Sev4",
@@ -208,7 +208,7 @@ warning_templates = [
         "technician": "Empty the tray, reset the sensor count, and verify the tray is reporting empty correctly.",
     },
     {
-        "title": "Pump Delay Notice",
+        "title": "Pump Start Delay Notice",
         "description": "A soft start delay was observed before beverage dispensing began.",
         "component": "Pump Motor",
         "severity": "Sev4",
@@ -216,7 +216,7 @@ warning_templates = [
         "technician": "Inspect the pump startup sequence and validate the control board is not limiting power unnecessarily.",
     },
     {
-        "title": "Recipe Volume Low",
+        "title": "Recipe Dispense Volume Low",
         "description": "One beverage recipe is dispensing slightly below the configured target volume.",
         "component": "Dispense Valve",
         "severity": "Sev4",
@@ -224,7 +224,7 @@ warning_templates = [
         "technician": "Recalibrate the recipe volume and test three consecutive servings before returning the unit.",
     },
     {
-        "title": "Delayed Heartbeat",
+        "title": "Machine Heartbeat Report Delayed",
         "description": "The machine has reported a delayed heartbeat to the central monitoring service.",
         "component": "Network Interface",
         "severity": "Sev4",
@@ -232,7 +232,7 @@ warning_templates = [
         "technician": "Inspect the network path, reboot the communication module, and confirm stable connectivity after restart.",
     },
     {
-        "title": "Cup Sensor Mismatch",
+        "title": "Cup Sensor State Mismatch",
         "description": "The cup detection sensor is intermittently miscounting the cup tray state.",
         "component": "Cup Dispenser",
         "severity": "Sev4",
@@ -240,7 +240,7 @@ warning_templates = [
         "technician": "Realign the sensor and verify the dispenser reports the correct cup count after a full cycle.",
     },
     {
-        "title": "Maintenance Reminder Pending",
+        "title": "Maintenance Reminder Still Pending",
         "description": "A scheduled preventive action has not yet been acknowledged by the maintenance team.",
         "component": "Service Scheduler",
         "severity": "Sev3",
@@ -248,7 +248,7 @@ warning_templates = [
         "technician": "Complete the outstanding maintenance task and clear the reminder from the service dashboard.",
     },
     {
-        "title": "Dispense Time Overrun",
+        "title": "Dispense Time Overrun Warning",
         "description": "A recent beverage cycle exceeded the normal dispense time by more than eight seconds.",
         "component": "Pump Assembly",
         "severity": "Sev3",
@@ -256,7 +256,7 @@ warning_templates = [
         "technician": "Clean the nozzle and verify pump flow rate and valve timing before resuming normal operation.",
     },
     {
-        "title": "Card Checksum Error",
+        "title": "Card Reader Checksum Error",
         "description": "The payment reader reported intermittent checksum errors during transaction processing.",
         "component": "Payment Reader Board",
         "severity": "Sev3",
@@ -264,7 +264,7 @@ warning_templates = [
         "technician": "Reseat the connector, inspect the reader board, and validate transaction integrity across test cards.",
     },
     {
-        "title": "Ingredient Ratio Drift",
+        "title": "Ingredient Mix Ratio Drift",
         "description": "The machine detected an out-of-spec ingredient mix during a brew cycle.",
         "component": "Brew Group",
         "severity": "Sev3",
@@ -280,7 +280,7 @@ warning_templates = [
         "technician": "Inspect the regulator and verify the pressure switch and safety valve are responding correctly.",
     },
     {
-        "title": "Cabinet Fan Cycle High",
+        "title": "Cabinet Fan Cycling High",
         "description": "Ventilation fan activity has exceeded the expected frequency for this machine location.",
         "component": "Cooling Fan",
         "severity": "Sev4",
@@ -291,7 +291,7 @@ warning_templates = [
 
 critical_templates = [
     {
-        "title": "Payment Blocked",
+        "title": "Payment Transactions Blocked Now",
         "description": "The cashless payment system is unable to authorize any transactions and the machine is blocked.",
         "component": "Payment Terminal",
         "severity": "Sev1",
@@ -299,7 +299,7 @@ critical_templates = [
         "technician": "Inspect the card reader hardware, verify all wiring, and replace the terminal if the self-test fails.",
     },
     {
-        "title": "Boiler Overheat",
+        "title": "Boiler Temperature Overheat Detected",
         "description": "The boiler has exceeded the safe operating temperature and entered a protective shutdown state.",
         "component": "Boiler and Heating Circuit",
         "severity": "Sev1",
@@ -307,7 +307,7 @@ critical_templates = [
         "technician": "Power down the unit, verify thermostat and thermal fuse operation, and replace failed heating components.",
     },
     {
-        "title": "Water Supply Lost",
+        "title": "Water Supply Connection Lost",
         "description": "The machine cannot complete beverage preparation because the water supply is unavailable.",
         "component": "Water Reservoir",
         "severity": "Sev2",
@@ -315,7 +315,7 @@ critical_templates = [
         "technician": "Refill the reservoir, inspect the inlet valve, and confirm the pump starts normally under load.",
     },
     {
-        "title": "Controller Fault",
+        "title": "Main Controller Hard Fault",
         "description": "The main controller failed to complete startup initialization and entered a hard fault state.",
         "component": "Main Controller",
         "severity": "Sev1",
@@ -323,7 +323,7 @@ critical_templates = [
         "technician": "Reboot the controller, reflash firmware if needed, and validate all sensor states before returning service.",
     },
     {
-        "title": "Grinder Jammed",
+        "title": "Coffee Grinder Mechanism Jammed",
         "description": "The grinder is blocked and all beverage dispensing operations are stopped.",
         "component": "Coffee Grinder",
         "severity": "Sev2",
@@ -331,7 +331,7 @@ critical_templates = [
         "technician": "Clear the jam, inspect the grind chamber, and verify the assembly runs normally through a calibration cycle.",
     },
     {
-        "title": "Boiler Leak Detected",
+        "title": "Boiler Leak Now Detected",
         "description": "A critical leak was detected in the boiler chamber and the machine was safely shut down.",
         "component": "Boiler Chamber",
         "severity": "Sev1",
@@ -339,7 +339,7 @@ critical_templates = [
         "technician": "Isolate the water supply, inspect the chamber seal and body, and replace any failed components before restart.",
     },
     {
-        "title": "Milk Pump Failed",
+        "title": "Milk Dispense Pump Failed",
         "description": "The milk pumping circuit has failed and dairy-based beverages are unavailable.",
         "component": "Milk Pump",
         "severity": "Sev2",
@@ -347,7 +347,7 @@ critical_templates = [
         "technician": "Replace the pump assembly, prime the line, and validate flow across three test cycles.",
     },
     {
-        "title": "Power Supply Failure",
+        "title": "Main Power Supply Failure",
         "description": "The primary power supply is unstable and is interrupting machine operation.",
         "component": "Power Supply Unit",
         "severity": "Sev1",
@@ -355,7 +355,7 @@ critical_templates = [
         "technician": "Measure output voltage under load, replace the failing supply, and verify no downstream board is experiencing brown-out conditions.",
     },
     {
-        "title": "Door Lockout Engaged",
+        "title": "Safety Door Lockout Engaged",
         "description": "A door safety lockout has engaged, preventing all service operations from resuming.",
         "component": "Door Interlock",
         "severity": "Sev1",
@@ -363,7 +363,7 @@ critical_templates = [
         "technician": "Inspect the actuator, verify the sensor wiring, and clear the lockout before restoring service.",
     },
     {
-        "title": "Dispense Pump Cavitation",
+        "title": "Dispense Pump Cavitation Detected",
         "description": "The dispenser pump is cavitating and no longer delivers a reliable beverage flow.",
         "component": "Dispense Pump",
         "severity": "Sev1",
@@ -373,6 +373,21 @@ critical_templates = [
 ]
 
 alerts = []
+
+
+def validate_alert_title(title, minimum_words=3, maximum_words=5):
+    """Keep generated titles within the compact range used by machine alerts."""
+    word_count = len(re.findall(r"\b[\w'-]+\b", title))
+    if not minimum_words <= word_count <= maximum_words:
+        raise ValueError(
+            f"Alert title must contain {minimum_words} to {maximum_words} words: {title!r} "
+            f"contains {word_count}."
+        )
+
+
+for template in info_templates + warning_templates + critical_templates:
+    validate_alert_title(template["title"])
+
 for idx in range(19):
     template = info_templates[idx % len(info_templates)]
     system_area, group = system_area_taxonomy(template["component"])
@@ -432,20 +447,20 @@ headers = [
 ]
 
 operator_responses = {
-    "Maintenance Reminder Pending": "Run service restart.\nRun maintenance cycle.",
-    "Low Bean Hopper": "Refill bean hopper.",
-    "Milk Tank Below Target": "Refill milk tank.",
-    "Water Level Warning": "Refill water tank.",
+    "Maintenance Reminder Still Pending": "Run service restart.\nRun maintenance cycle.",
+    "Bean Hopper Level Low": "Refill bean hopper.",
+    "Milk Tank Below Refill Target": "Refill milk tank.",
+    "Water Tank Level Warning": "Refill water tank.",
     "Payment Retry Rate Elevated": "Disconnect and reconnect payment machine.\nTry with secondary payment method.\nReconnect primary machine.",
-    "Drip Tray Almost Full": "Empty drip tray.",
-    "Payment Blocked": "Check network is up.\nFollow payment machine restart procedure.\nRetry again.\nIf problem persists, call service team.",
-    "Boiler Overheat": "Wait for 15 minutes.\nTry again.",
-    "Controller Fault": "Follow machine restart procedure.\nIf problem persists, call service team.",
-    "Grinder Jammed": "Empty coffee grinder.\nClean hopper.\nRestart machine.\nTry again.\nIf issue persists, call service team.",
-    "Boiler Leak Detected": "Turn off machine.\nEmpty tank.\nCall service team.",
-    "Power Supply Failure": "Do not use machine.\nTurn off mains power.\nCall service team.",
-    "Door Lockout Engaged": "Check door latch.\nCheck for occlusions.\nRestart machine.",
-    "Dispense Pump Cavitation": "Turn off machine.\nRun coffee maintenance cycle twice.\nRetry.\nIf problem persists, call service team.",
+    "Drip Tray Nearly Full": "Empty drip tray.",
+    "Payment Transactions Blocked Now": "Check network is up.\nFollow payment machine restart procedure.\nRetry again.\nIf problem persists, call service team.",
+    "Boiler Temperature Overheat Detected": "Wait for 15 minutes.\nTry again.",
+    "Main Controller Hard Fault": "Follow machine restart procedure.\nIf problem persists, call service team.",
+    "Coffee Grinder Mechanism Jammed": "Empty coffee grinder.\nClean hopper.\nRestart machine.\nTry again.\nIf issue persists, call service team.",
+    "Boiler Leak Now Detected": "Turn off machine.\nEmpty tank.\nCall service team.",
+    "Main Power Supply Failure": "Do not use machine.\nTurn off mains power.\nCall service team.",
+    "Safety Door Lockout Engaged": "Check door latch.\nCheck for occlusions.\nRestart machine.",
+    "Dispense Pump Cavitation Detected": "Turn off machine.\nRun coffee maintenance cycle twice.\nRetry.\nIf problem persists, call service team.",
 }
 
 OPERATOR_VERIFICATION_CHECKS = {

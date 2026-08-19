@@ -146,6 +146,7 @@ The React interface reads `data/alerts-ds.json` directly and provides:
 - Text search that excludes the Last Update field
 - Major-group tabs plus dependent system-area, type, severity, and individual model filters
 - A sitemap at `/sitemap`, subdivided into linkable major groups and system-area alert lists
+- An About page at `/about` describing the fictional portfolio context and development approach
 - Shared site navigation and data-version footer across catalogue and reference pages
 - Taxonomy breadcrumbs that return to a pre-filtered catalogue
 - Clickable table headers for ascending and descending column sorting
@@ -218,6 +219,20 @@ command is for local checking, not for operating a public production server.
 When deploying to a static host, configure unknown paths to serve `index.html`
 so direct alert URLs such as `/9` load correctly. This is commonly called an
 SPA fallback or rewrite rule.
+
+## Portfolio disclosure
+
+Alert atlas is a fictional portfolio demonstration. ACME COFFEE, its machine
+models, alerts, response guidance, service procedures, and technician
+instructions are synthetic and are not associated with a real manufacturer.
+The content must not be used to operate, maintain, or repair real equipment.
+
+This project was developed using OpenAI Codex-assisted workflows. Requirements,
+information architecture, taxonomy, interaction design, review, testing, and
+final acceptance remained the responsibility of the project owner.
+
+The website presents this disclosure on `/about` and in the shared footer. The
+generated PDF repeats the fictional-data notice on its cover and every page.
 
 ## Notes
 

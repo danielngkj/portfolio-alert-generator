@@ -14,17 +14,29 @@ const SEARCH_FIELDS = [
   "Operator Response", "Model", "Version", "Notes", "Critical Stop Response",
   "Service Response", "Technician Response",
 ];
+const CRITICAL_STOP_CONTENT = {
+  term: "Critical Stop Response",
+  definition: "An instruction indicating whether the machine or affected service must stop immediately.",
+  heading: "Critical stop required",
+  instruction: "Stop the machine or affected function immediately. Follow the response guidance before returning it to service.",
+};
 const GLOSSARY_TERMS = [
   { term: "Alert", definition: "A machine event that communicates a condition, change, or fault requiring awareness or action." },
-  { term: "Severity", definition: "The impact level assigned to an alert, from Sev1 for the most urgent conditions to Sev5 for informational events." },
-  { term: "Informational", definition: "A normal operating event or status update that does not require corrective action." },
-  { term: "Warning", definition: "A condition that may affect service if it continues and should be monitored or addressed soon." },
+  { term: "Alert ID", definition: "The unique number used to identify, search for, and share a specific alert." },
   { term: "Critical", definition: "A serious fault that can stop service, affect safety, or require immediate intervention." },
-  { term: "System Area", definition: "The functional area of the coffee machine associated with an alert, such as heating and boiler, payment, or dispensing." },
-  { term: "Model", definition: "The ACME coffee-machine family to which an alert applies, including SC1x, SC2x, and SC3x." },
+  { term: CRITICAL_STOP_CONTENT.term, definition: CRITICAL_STOP_CONTENT.definition },
+  { term: "Escalation", definition: "Passing an unresolved alert to the appropriate service or technical team for further action." },
+  { term: "Informational", definition: "A normal operating event or status update that does not require corrective action." },
+  { term: "Major Group", definition: "A broad organizational category that brings together related coffee machine System Areas." },
+  { term: "Model", definition: "The ACME coffee machine family to which an alert applies, including SC1x, SC2x, and SC3x." },
   { term: "Operator Response", definition: "The immediate action a site operator can take before escalating the alert to a service team." },
+  { term: "Out of Service", definition: "A machine or function that must remain unavailable until it has been checked or repaired." },
   { term: "Service Response", definition: "A service-level explanation of the alert's operational impact and expected next step." },
-  { term: "Technician Response", definition: "Diagnostic or repair guidance intended for a trained coffee-machine technician." },
+  { term: "Severity", definition: "The impact level assigned to an alert, from Sev1 for the most urgent conditions to Sev5 for informational events." },
+  { term: "System Area", definition: "The functional area of the coffee machine associated with an alert, such as heating and boiler, payment, or dispensing." },
+  { term: "Technician Response", definition: "Diagnostic or repair guidance intended for a trained coffee machine technician." },
+  { term: "Verification Check", definition: "A check performed after an action to confirm the alert is resolved and operation can continue safely." },
+  { term: "Warning", definition: "A condition that may affect service if it continues and should be monitored or addressed soon." },
 ];
 const SEVERITY_DEFINITION = GLOSSARY_TERMS.find(({ term }) => term === "Severity").definition;
 const TYPE_DEFINITIONS = Object.fromEntries(
@@ -70,8 +82,9 @@ function formatTimestamp(timestamp) {
 }
 
 function SiteBanner({ onNavigate, currentPath }) {
-  const resourceLink = (path, label) => (
+  const resourceLink = (path, label, className) => (
     <a
+      className={className}
       href={path}
       aria-current={currentPath === path ? "page" : undefined}
       onClick={(event) => { event.preventDefault(); onNavigate(path); }}
@@ -87,6 +100,7 @@ function SiteBanner({ onNavigate, currentPath }) {
       <nav aria-label="Site navigation">
         {resourceLink("/glossary", "Glossary")}
         {resourceLink("/sitemap", "Sitemap")}
+        {resourceLink("/about", "ABOUT", "nav-featured")}
         <a className="banner-download" href="/downloads/alert-atlas.pdf" download>
           <span className="pdf-mini-icon" aria-hidden="true">PDF</span> Download PDF
         </a>
@@ -100,12 +114,14 @@ function SiteFooter({ onNavigate }) {
     <footer className="site-footer">
       <div>
         <strong>Alert atlas</strong>
+        <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
         <span><span className="data-status" aria-hidden="true">●</span> Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
       </div>
       <nav aria-label="Footer navigation">
         <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
         <a href="/glossary" onClick={(event) => { event.preventDefault(); onNavigate("/glossary"); }}>Glossary</a>
         <a href="/sitemap" onClick={(event) => { event.preventDefault(); onNavigate("/sitemap"); }}>Sitemap</a>
+        <a href="/about" onClick={(event) => { event.preventDefault(); onNavigate("/about"); }}>About</a>
       </nav>
     </footer>
   );
@@ -358,7 +374,6 @@ function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate,
     return (
       <main className="detail-shell">
         <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
-        <button className="back-link" onClick={onBack}>← Back to alerts</button>
         <section className="empty-state" id="main-content" tabIndex="-1">
           <span>?</span><h1 data-route-heading tabIndex="-1">Alert not found</h1>
           <p>The requested alert ID does not exist in this catalogue.</p>
@@ -370,6 +385,7 @@ function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate,
   }
 
   const response = alert["Operator Response"] || "No operator action required.";
+  const criticalStopRequired = String(alert["Critical Stop Response"] || "").trim().toLowerCase() === "yes";
   const copyDetails = () => copyText([
     `${alert.ID} - ${alert["Alert Title"]}`,
     "",
@@ -396,10 +412,9 @@ function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate,
     .map(({ alert: candidate }) => candidate);
 
   return (
-    <main className="detail-shell">
+      <main className="detail-shell">
       <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
-      <div className="detail-toolbar">
-        <button className="back-link" onClick={onBack}>← Back to alerts</button>
+      <div className="detail-toolbar detail-toolbar-actions">
         <div className="detail-actions">
           <span className="copy-status" aria-live="polite">{copyStatus}</span>
           <button onClick={copyDetails}>Copy alert details</button>
@@ -438,11 +453,20 @@ function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate,
         </div>
         <h1 data-route-heading tabIndex="-1">{alert["Alert Title"]}</h1>
         <p className="detail-description">{alert["Alert Description"]}</p>
+        {criticalStopRequired && (
+          <aside className="critical-stop-callout" aria-label={CRITICAL_STOP_CONTENT.heading}>
+            <span className="critical-stop-mark" aria-hidden="true">STOP</span>
+            <div>
+              <strong>{CRITICAL_STOP_CONTENT.heading}</strong>
+              <p>{CRITICAL_STOP_CONTENT.instruction}</p>
+            </div>
+          </aside>
+        )}
 
         <dl className="detail-metadata">
           {["Type", "Model", "Version", "Critical Stop Response", "Notes"].map((field) => (
             <div key={field} className={field === "Type" ? "type-metadata" : undefined}>
-              <dt>{["Type", "Model"].includes(field)
+              <dt>{["Type", "Model", "Critical Stop Response"].includes(field)
                 ? <GlossaryTerm term={field === "Type" ? alert.Type : field}>{field}</GlossaryTerm>
                 : field}</dt>
               <dd
@@ -486,13 +510,10 @@ function AlertDetail({ alert, onBack, onOpenAlert, onSelectTaxonomy, onNavigate,
   );
 }
 
-function GlossaryPage({ onBack, onNavigate, currentPath }) {
+function GlossaryPage({ onNavigate, currentPath }) {
   return (
     <main className="group-page-shell">
       <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
-      <div className="detail-toolbar">
-        <button className="back-link" onClick={onBack}>← Back to alerts</button>
-      </div>
       <header className="group-page-header" id="main-content" tabIndex="-1">
         <span>Reference</span>
         <h1 data-route-heading tabIndex="-1">Alert glossary</h1>
@@ -517,13 +538,10 @@ function GlossaryPage({ onBack, onNavigate, currentPath }) {
   );
 }
 
-function SitemapPage({ onBack, onOpenAlert, onNavigate, currentPath }) {
+function SitemapPage({ onOpenAlert, onNavigate, currentPath }) {
   return (
     <main className="group-page-shell" id="sitemap-top">
       <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
-      <div className="detail-toolbar">
-        <button className="back-link" onClick={onBack}>← Back to alerts</button>
-      </div>
       <header className="group-page-header" id="main-content" tabIndex="-1">
         <span>Reference</span>
         <h1 data-route-heading tabIndex="-1">Sitemap</h1>
@@ -586,6 +604,81 @@ function SitemapPage({ onBack, onOpenAlert, onNavigate, currentPath }) {
   );
 }
 
+function AboutPage({ onNavigate, currentPath }) {
+  return (
+    <main className="group-page-shell">
+      <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
+      <header className="group-page-header" id="main-content" tabIndex="-1">
+        <span>Portfolio project</span>
+        <h1 data-route-heading tabIndex="-1">About Alert atlas</h1>
+        <p>One structured source, turned into practical help for the web and print.</p>
+      </header>
+      <section className="pipeline-diagram" aria-labelledby="pipeline-title">
+        <div className="pipeline-heading">
+          <span>Content flow</span>
+          <h2 id="pipeline-title">From source to publication</h2>
+        </div>
+        <div className="pipeline-flow">
+          <div className="pipeline-node">
+            <span>Source</span>
+            <strong>Excel alert catalogue</strong>
+          </div>
+          <span className="pipeline-arrow" aria-hidden="true">→</span>
+          <div className="pipeline-node">
+            <span>Transform</span>
+            <strong>Python generation and extraction</strong>
+          </div>
+          <span className="pipeline-arrow" aria-hidden="true">→</span>
+          <div className="pipeline-node">
+            <span>Structured data</span>
+            <strong>Reusable JSON alert records</strong>
+          </div>
+          <span className="pipeline-arrow" aria-hidden="true">→</span>
+          <div className="pipeline-node pipeline-outputs">
+            <span>Publish</span>
+            <strong>Searchable website</strong>
+            <strong>PDF handbook</strong>
+          </div>
+        </div>
+        <div className="reuse-map" aria-labelledby="reuse-map-title">
+          <h3 id="reuse-map-title">Content reuse</h3>
+          <div className="reuse-flow">
+            <div className="reuse-source">
+              <span>Maintain once</span>
+              <strong>Glossary definition</strong>
+            </div>
+            <span className="reuse-arrow" aria-hidden="true">→</span>
+            <div className="reuse-destinations" aria-label="Reused in three places">
+              <span>Glossary page</span>
+              <span>Table tooltips</span>
+              <span>Alert detail tooltips</span>
+            </div>
+          </div>
+        </div>
+      </section>
+      <div className="about-sections">
+        <section>
+          <h2>Why it exists</h2>
+          <p>Alert atlas turns a spreadsheet-based coffee machine alert catalogue into a searchable website and downloadable PDF. It keeps support information easy to find, understand, and maintain.</p>
+        </section>
+        <section>
+          <h2>Reusable content</h2>
+          <p>One structured dataset powers both the website and handbook. Glossary definitions are written once and reused on the reference page and in tooltips.</p>
+        </section>
+        <section>
+          <h2>How it was built</h2>
+          <p>React and Python support the Excel-to-JSON pipeline, website, and automated PDF. OpenAI Codex assisted development; the project owner set the direction, then reviewed, tested, and refined the work.</p>
+        </section>
+        <section>
+          <h2>Fictional by design</h2>
+          <p>ACME COFFEE, its models, alerts, and guidance are fictional. This content is not associated with a real manufacturer or intended for use with real equipment.</p>
+        </section>
+      </div>
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  );
+}
+
 function App() {
   const [initialViewState] = useState(loadViewState);
   const controlsSentinelRef = useRef(null);
@@ -638,7 +731,8 @@ function App() {
   const route = decodeURIComponent(path.replace(/^\/+|\/+$/g, ""));
   const isGlossary = route === "glossary";
   const isSitemap = route === "sitemap";
-  const alertId = isGlossary || isSitemap ? "" : route;
+  const isAbout = route === "about";
+  const alertId = isGlossary || isSitemap || isAbout ? "" : route;
   const selectedAlert = alertId ? alerts.find((alert) => alert.ID === alertId) : null;
 
   const navigate = (nextPath) => {
@@ -729,24 +823,29 @@ function App() {
       ? "Glossary · Alert atlas"
       : isSitemap
         ? "Sitemap · Alert atlas"
+      : isAbout
+        ? "About · Alert atlas"
       : alertId && selectedAlert
         ? `${selectedAlert["Alert Title"]} · Alert atlas`
         : "Alert atlas";
-  }, [alertId, isGlossary, isSitemap, selectedAlert]);
+  }, [alertId, isAbout, isGlossary, isSitemap, selectedAlert]);
 
   if (isGlossary) {
-    return <GlossaryPage onBack={() => navigate("/")} onNavigate={navigate} currentPath={path} />;
+    return <GlossaryPage onNavigate={navigate} currentPath={path} />;
   }
 
   if (isSitemap) {
     return (
       <SitemapPage
-        onBack={() => navigate("/")}
         onOpenAlert={(id) => navigate(`/${id}`)}
         onNavigate={navigate}
         currentPath={path}
       />
     );
+  }
+
+  if (isAbout) {
+    return <AboutPage onNavigate={navigate} currentPath={path} />;
   }
 
   if (alertId) {
