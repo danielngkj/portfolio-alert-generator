@@ -12,6 +12,15 @@ __pycache__/
 venv/
 env/
 
+# Environment files and private credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
 # Test, coverage, and tool caches
 .pytest_cache/
 .mypy_cache/
@@ -22,6 +31,7 @@ htmlcov/
 # Frontend dependencies and builds
 node_modules/
 dist/
+.vercel/
 
 # Editor-specific settings
 .idea/

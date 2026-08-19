@@ -220,6 +220,23 @@ When deploying to a static host, configure unknown paths to serve `index.html`
 so direct alert URLs such as `/9` load correctly. This is commonly called an
 SPA fallback or rewrite rule.
 
+### Deploy to Vercel
+
+The repository includes `vercel.json` with the SPA rewrite, production build
+command, `dist` output directory, and sitewide no-index response header. Import
+the private GitHub repository into Vercel with these project settings:
+
+- Framework preset: Vite
+- Root directory: `.`
+- Build command: `npm run build`
+- Output directory: `dist`
+- Production branch: `main`
+- Environment variables: none required
+
+After deployment, verify `/about`, `/glossary`, `/sitemap`, a direct alert URL,
+and `/downloads/alert-atlas.pdf`. Also confirm responses include
+`X-Robots-Tag: noindex, nofollow, noarchive`.
+
 ### Search indexing controls
 
 This portfolio is intended to be shared by direct link rather than listed by

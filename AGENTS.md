@@ -96,7 +96,8 @@ npm run build
 - Keep the fictional-data notice visible in every site footer and PDF page.
 - Preserve the robots `noindex` meta directive and the sitewide
   `public/_headers` `X-Robots-Tag` rule unless public indexing is explicitly requested.
-- Configure static hosting with an SPA fallback to `index.html`.
+- Preserve `vercel.json`, including its SPA fallback to `index.html` and
+  sitewide `X-Robots-Tag` rule.
 - Prefer compact tables and reference lists over card-heavy layouts.
 - Keep Major Group navigation broad and System Area information specific.
 
