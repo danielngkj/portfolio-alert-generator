@@ -6,6 +6,9 @@ from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.utils import get_column_letter
 
+PROJECT_ROOT = Path(__file__).resolve().parent.parent
+DEFAULT_OUTPUT = PROJECT_ROOT / "data" / "generated" / "alerts-ds-generated.xlsx"
+
 taxonomy_map = {
     "Control Board": "Control",
     "Connectivity Module": "Control",
@@ -512,9 +515,9 @@ def build_workbook():
 
 def main():
     parser = argparse.ArgumentParser(description="Generate the cashless machine alert catalogue.")
-    parser.add_argument("-o", "--output", default="cashless_machine_alerts.xlsx", help="Output .xlsx path")
+    parser.add_argument("-o", "--output", type=Path, default=DEFAULT_OUTPUT, help="Output .xlsx path")
     args = parser.parse_args()
-    output = Path(args.output)
+    output = args.output
     if "donotdelete" in output.name.lower():
         parser.error("refusing to overwrite a DONOTDELETE reference workbook")
     if output.suffix.lower() != ".xlsx":

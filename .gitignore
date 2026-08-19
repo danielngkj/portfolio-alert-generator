@@ -19,6 +19,10 @@ env/
 .coverage
 htmlcov/
 
+# Frontend dependencies and builds
+node_modules/
+dist/
+
 # Editor-specific settings
 .idea/
 .vscode/
@@ -28,6 +32,7 @@ htmlcov/
 # Temporary Office files and generated verification artifacts
 ~$*.xlsx
 outputs/
+data/generated/
 
 # Temporary files and directories
 tmp/
