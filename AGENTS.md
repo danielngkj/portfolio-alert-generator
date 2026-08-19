@@ -94,6 +94,8 @@ npm run build
 - Preserve the `/glossary` and `/sitemap` routes and linkable Sitemap anchors.
 - Preserve the `/about` route and its fictional-data and Codex-assistance disclosure.
 - Keep the fictional-data notice visible in every site footer and PDF page.
+- Preserve the robots `noindex` meta directive and the sitewide
+  `public/_headers` `X-Robots-Tag` rule unless public indexing is explicitly requested.
 - Configure static hosting with an SPA fallback to `index.html`.
 - Prefer compact tables and reference lists over card-heavy layouts.
 - Keep Major Group navigation broad and System Area information specific.

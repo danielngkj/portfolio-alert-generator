@@ -152,7 +152,7 @@ The React interface reads `data/alerts-ds.json` directly and provides:
 - Clickable table headers for ascending and descending column sorting
 - Hero link to six recently updated alerts beneath the results table
 - Dedicated alert pages at `/<alert_id>`
-- A 10-term glossary at `/glossary` with directly linkable term anchors
+- An alphabetized glossary at `/glossary` with directly linkable term anchors
 - Severity tooltips that reuse the glossary definition
 - Copy-link and print actions on individual alert pages
 - A compact PDF alert handbook generated from the same JSON data
@@ -219,6 +219,20 @@ command is for local checking, not for operating a public production server.
 When deploying to a static host, configure unknown paths to serve `index.html`
 so direct alert URLs such as `/9` load correctly. This is commonly called an
 SPA fallback or rewrite rule.
+
+### Search indexing controls
+
+This portfolio is intended to be shared by direct link rather than listed by
+search engines. `index.html` includes a sitewide `noindex, nofollow, noarchive`
+robots directive. Vite also copies `public/_headers` into the production build;
+hosts that support static `_headers` files will send the equivalent
+`X-Robots-Tag` header for HTML, JSON, and PDF responses.
+
+Do not block the whole site with `robots.txt`, because a crawler must be able to
+read the `noindex` instruction. Confirm that the chosen host supports the
+generated `_headers` file or configure the same header in its deployment
+settings. These controls discourage compliant search engines from indexing the
+site but do not restrict access. Use authentication if access control is needed.
 
 ## Portfolio disclosure
 
