@@ -148,7 +148,7 @@ select { border: 1px solid var(--line); border-radius: 10px; background: #f8f5f1
 .operator-tooltip > span { display: block; }
 .operator-tooltip-date { color: #c8c2bc; font-size: 10px; line-height: 1.3; margin-top: 3px; }
 .operator-tooltip-response { color: #ebe7e2; font-size: 12px; line-height: 1.45; margin-top: 7px; white-space: pre-line; }
-.alert-table tbody tr:hover .operator-tooltip { opacity: 1; transform: none; transition-delay: 1s; }
+.alert-table .table-title:hover .operator-tooltip { opacity: 1; transform: none; transition-delay: 1s; }
 .alert-table tbody tr:focus-visible .operator-tooltip { position: absolute; left: 14px; top: calc(100% - 5px); opacity: 1; transform: translateY(0); transition-delay: 0s; }
 .table-title mark { border-radius: 3px; background: #f6d9a3; color: inherit; padding: 0 1px; }
 .card-topline { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 12px; }

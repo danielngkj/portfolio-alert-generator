@@ -272,19 +272,6 @@ function AlertTable({ alerts: tableAlerts, onOpen, sortConfig, onSort, query }) 
               aria-label={`Open alert ${alert.ID}: ${alert["Alert Title"]}`}
               aria-describedby={`operator-tooltip-${alert.ID}-${index}`}
               onClick={() => onOpen(alert.ID)}
-              onMouseMove={(event) => {
-                const tooltip = event.currentTarget.querySelector(".operator-tooltip");
-                if (!tooltip) return;
-                const gap = 14;
-                const bounds = tooltip.getBoundingClientRect();
-                const left = Math.min(event.clientX + gap, window.innerWidth - bounds.width - 12);
-                const below = event.clientY + gap;
-                const top = below + bounds.height <= window.innerHeight - 12
-                  ? below
-                  : Math.max(12, event.clientY - bounds.height - gap);
-                tooltip.style.setProperty("--tooltip-left", `${Math.max(12, left)}px`);
-                tooltip.style.setProperty("--tooltip-top", `${top}px`);
-              }}
               onKeyDown={(event) => {
                 if (event.key === "Enter" || event.key === " ") {
                   event.preventDefault();
@@ -292,7 +279,22 @@ function AlertTable({ alerts: tableAlerts, onOpen, sortConfig, onSort, query }) 
                 }
               }}
             >
-              <td className="table-title">
+              <td
+                className="table-title"
+                onMouseMove={(event) => {
+                  const tooltip = event.currentTarget.querySelector(".operator-tooltip");
+                  if (!tooltip) return;
+                  const gap = 14;
+                  const bounds = tooltip.getBoundingClientRect();
+                  const left = Math.min(event.clientX + gap, window.innerWidth - bounds.width - 12);
+                  const below = event.clientY + gap;
+                  const top = below + bounds.height <= window.innerHeight - 12
+                    ? below
+                    : Math.max(12, event.clientY - bounds.height - gap);
+                  tooltip.style.setProperty("--tooltip-left", `${Math.max(12, left)}px`);
+                  tooltip.style.setProperty("--tooltip-top", `${top}px`);
+                }}
+              >
                 <div className="table-title-heading">
                   <span className="table-alert-id">{alert.ID}</span>
                   <strong><HighlightedText text={alert["Alert Title"]} query={query} /></strong>
@@ -689,15 +691,15 @@ function AboutPage({ onNavigate, currentPath }) {
       <div className="about-sections">
         <section>
           <h2>Why it exists</h2>
-          <p>Alert atlas turns a spreadsheet-based coffee machine alert catalogue into a searchable website and downloadable PDF. It keeps support information easy to find, understand, and maintain.</p>
+          <p>This alert documentation generator turns a spreadsheet-based coffee machine alert catalogue into a searchable website and downloadable PDF. It keeps support information easy to find, understand, and maintain.</p>
         </section>
         <section>
           <h2>Reusable content</h2>
-          <p>One structured dataset powers both the website and handbook. Glossary definitions are written once and reused on the reference page and in tooltips.</p>
+          <p>One structured dataset powers both the website and handbook. Glossary definitions are maintained in one central list and reused on the reference page and in relevant tooltips.</p>
         </section>
         <section>
           <h2>How it was built</h2>
-          <p>I designed the information architecture, alert taxonomy, data pipeline, interface, and accessibility behavior. OpenAI Codex assisted with implementation and iteration; I reviewed the generated work, tested the outputs, and made the final product decisions.</p>
+          <p>I designed the information architecture, alert taxonomy, data pipeline, interface, and accessibility behavior. OpenAI Codex assisted with implementation and iteration. I reviewed the work, tested the outputs, and made all final product decisions.</p>
           <a
             className="about-source-link"
             href="https://github.com/danielngkj/portfolio-alert-generator"
@@ -707,7 +709,7 @@ function AboutPage({ onNavigate, currentPath }) {
         </section>
         <section>
           <h2>Fictional by design</h2>
-          <p>ACME COFFEE, its models, alerts, and guidance are fictional. This content is not associated with a real manufacturer or intended for use with real equipment.</p>
+          <p>ACME COFFEE, its coffee machine models, alerts, and guidance are fictional. This project is not associated with any real manufacturer and is not intended for use with real equipment.</p>
         </section>
       </div>
       <section className="project-resources" aria-labelledby="project-resources-title">
