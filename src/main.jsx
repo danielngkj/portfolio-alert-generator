@@ -174,6 +174,7 @@ function SiteFooter({ onNavigate }) {
             placeholder="Ask about an alert or symptom…"
             welcome="Ask about an alert or symptom and I’ll search the available documentation."
           />
+          <a className="chatbot-about-link" href="/chatbot" onClick={(event) => { event.preventDefault(); onNavigate("/chatbot"); }}>How it works</a>
         </aside>
       )}
       <footer className="site-footer">
@@ -640,6 +641,7 @@ function SitemapPage({ onOpenAlert, onNavigate, currentPath }) {
         <p>Browse all alerts by major group and system area.</p>
       </header>
       <nav className="sitemap-contents" aria-label="Sitemap contents">
+        <a href="/chatbot" onClick={(event) => { event.preventDefault(); onNavigate("/chatbot"); }}>How the chatbot works</a>
         {MAJOR_GROUPS.map((group) => <a key={group} href={`#${majorGroupSlug(group)}`}>{group}</a>)}
       </nav>
       <div className="sitemap-groups">
@@ -772,6 +774,13 @@ function AboutPage({ onNavigate, currentPath }) {
           >
             View source on GitHub <span aria-hidden="true">↗</span>
           </a>
+          <a
+            className="about-source-link"
+            href="/chatbot"
+            onClick={(event) => { event.preventDefault(); onNavigate("/chatbot"); }}
+          >
+            How the chatbot works <span aria-hidden="true">→</span>
+          </a>
         </section>
         <section>
           <h2>Fictional by design</h2>
@@ -791,6 +800,65 @@ function AboutPage({ onNavigate, currentPath }) {
             View source on GitHub <span aria-hidden="true">↗</span>
           </a>
         </div>
+      </section>
+      <SiteFooter onNavigate={onNavigate} />
+    </main>
+  );
+}
+
+function ChatbotPage({ onNavigate, currentPath }) {
+  return (
+    <main className="group-page-shell">
+      <SiteBanner onNavigate={onNavigate} currentPath={currentPath} />
+      <header className="group-page-header" id="main-content" tabIndex="-1">
+        <span>Portfolio project</span>
+        <h1 data-route-heading tabIndex="-1">How the chatbot works</h1>
+        <p>A high-level look at how Alert atlas turns a natural-language question into a grounded documentation answer.</p>
+      </header>
+
+      <section className="chatbot-architecture" aria-labelledby="chatbot-architecture-title">
+        <div className="chatbot-architecture-heading">
+          <span>Overview</span>
+          <h2 id="chatbot-architecture-title">From question to useful answer</h2>
+        </div>
+        <div className="chatbot-flow" aria-label="Chatbot request flow diagram">
+          <div className="chatbot-flow-node"><span>01 · Ask</span><strong>Visitor question</strong><small>“What should the operator do?”</small></div>
+          <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
+          <div className="chatbot-flow-node"><span>02 · Send</span><strong>Portal widget</strong><small>Simple chat interface in Alert atlas</small></div>
+          <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
+          <div className="chatbot-flow-node"><span>03 · Find</span><strong>Chat API</strong><small>Searches the alert documentation index</small></div>
+          <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
+          <div className="chatbot-flow-node"><span>04 · Ground</span><strong>Relevant evidence</strong><small>Accepted alert sources and metadata</small></div>
+          <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
+          <div className="chatbot-flow-node"><span>05 · Return</span><strong>Cited response</strong><small>Answer, citations, and expandable sources</small></div>
+        </div>
+      </section>
+
+      <div className="chatbot-overview-sections">
+        <section>
+          <h2>What I built</h2>
+          <p>The chatbot is a small grounded question-and-answer layer for the synthetic alert catalogue. The portal provides the interaction, while a separate API retrieves relevant documentation and asks the language model to answer only from that evidence.</p>
+        </section>
+        <section>
+          <h2>How it was created</h2>
+          <p>I started with a structured alert dataset, added retrieval and source metadata, then introduced generated answers behind a stable API contract. The widget was added as a dependency-free web component so it can be embedded without coupling the portal to the chatbot runtime.</p>
+        </section>
+        <section>
+          <h2>Grounding by design</h2>
+          <p>Questions are matched against the alert documentation before an answer is generated. Responses retain alert citations and expose the supporting source records so a visitor can inspect where the answer came from.</p>
+        </section>
+        <section>
+          <h2>Bounded behavior</h2>
+          <p>If the documentation does not support an answer, the chatbot refuses or asks for a clearer alert-related question. The browser never receives the provider key or direct access to the document index.</p>
+        </section>
+      </div>
+      <section className="chatbot-try-it" aria-labelledby="chatbot-try-title">
+        <div>
+          <span>Try it</span>
+          <h2 id="chatbot-try-title">Ask AI from the portal</h2>
+          <p>Use the floating `Ask AI` button on any page to open the assistant without leaving the alert catalogue.</p>
+        </div>
+        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Back to top ↑</button>
       </section>
       <SiteFooter onNavigate={onNavigate} />
     </main>
@@ -850,7 +918,8 @@ function App() {
   const isGlossary = route === "glossary";
   const isSitemap = route === "sitemap";
   const isAbout = route === "about";
-  const alertId = isGlossary || isSitemap || isAbout ? "" : route;
+  const isChatbot = route === "chatbot";
+  const alertId = isGlossary || isSitemap || isAbout || isChatbot ? "" : route;
   const selectedAlert = alertId ? alerts.find((alert) => alert.ID === alertId) : null;
 
   const navigate = (nextPath) => {
@@ -943,10 +1012,12 @@ function App() {
         ? "Sitemap · Alert atlas"
       : isAbout
         ? "About · Alert atlas"
+      : isChatbot
+        ? "How the chatbot works · Alert atlas"
       : alertId && selectedAlert
         ? `${selectedAlert["Alert Title"]} · Alert atlas`
         : "Alert atlas";
-  }, [alertId, isAbout, isGlossary, isSitemap, selectedAlert]);
+  }, [alertId, isAbout, isChatbot, isGlossary, isSitemap, selectedAlert]);
 
   if (isGlossary) {
     return <GlossaryPage onNavigate={navigate} currentPath={path} />;
@@ -964,6 +1035,10 @@ function App() {
 
   if (isAbout) {
     return <AboutPage onNavigate={navigate} currentPath={path} />;
+  }
+
+  if (isChatbot) {
+    return <ChatbotPage onNavigate={navigate} currentPath={path} />;
   }
 
   if (alertId) {

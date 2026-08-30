@@ -311,6 +311,9 @@ generated PDF repeats the fictional-data notice on its cover and every page.
 
 ## Documentation chatbot
 
+The portfolio overview is published at `/chatbot` and explains the chatbot architecture at a
+high level with an overview diagram. It intentionally omits credentials and operational secrets.
+
 Every route exposes a floating `Ask AI` button in the lower-right corner. Clicking it opens a
 responsive right-hand assistant pane while the alert portal remains visible at approximately a
 70:30 content split on desktop. The pane embeds the dependency-free `documentation-chat` widget;
