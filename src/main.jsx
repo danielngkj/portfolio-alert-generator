@@ -903,10 +903,9 @@ function ChatbotPage({ onNavigate, currentPath }) {
           <p>Answers use relevant alert documentation, retain citations, and expose supporting sources. When the documentation cannot support an answer, the chatbot refuses rather than filling the gap with general knowledge. The browser never receives the provider key or direct index access.</p>
         </section>
       </div>
-      <section className="chatbot-try-it" aria-labelledby="chatbot-try-title">
+      <section className="chatbot-try-it" aria-label="Try Ask AI from the portal">
         <div>
           <span>Try it</span>
-          <h2 id="chatbot-try-title">Ask AI from the portal</h2>
           <p>Use the floating `Ask AI` button on any page to open the assistant without leaving the alert catalogue.</p>
         </div>
       </section>
