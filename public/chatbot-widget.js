@@ -7,14 +7,32 @@
       :host { color: var(--chat-text); display: block; font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; max-width: 44rem; }
       * { box-sizing: border-box; }
       .shell { background: var(--chat-background); border: 1px solid var(--chat-border); border-radius: 1rem; box-shadow: 0 1rem 2.5rem rgb(36 35 33 / 10%); overflow: hidden; }
-      header { background: var(--chat-accent); color: #fff; padding: 1rem 1.25rem; }
+      header { align-items: center; background: var(--chat-accent); color: #fff; display: flex; gap: 1rem; justify-content: space-between; padding: 1rem 1.25rem; }
       h2 { font: 700 1.05rem/1.3 "Manrope", sans-serif; margin: 0; }
       header p { font-size: .82rem; margin: .25rem 0 0; opacity: .9; }
+      .new-chat { background: transparent; border: 1px solid rgb(255 255 255 / 55%); font-size: .78rem; padding: .45rem .65rem; white-space: nowrap; }
+      .new-chat:hover { background: rgb(255 255 255 / 15%); }
       .messages { display: flex; flex-direction: column; gap: .9rem; max-height: 28rem; min-height: 15rem; overflow-y: auto; padding: 1.25rem; }
+      .welcome-panel { background: var(--chat-surface); border: 1px solid var(--chat-border); border-radius: .85rem; margin-bottom: .1rem; padding: 1rem; }
+      .welcome-panel strong { display: block; font-size: .92rem; margin-bottom: .3rem; }
+      .welcome-panel p { color: var(--chat-muted); font-size: .82rem; line-height: 1.45; margin: 0 0 .8rem; }
+      .suggestions { display: flex; flex-wrap: wrap; gap: .45rem; }
+      .suggestion { background: var(--chat-background); border: 1px solid var(--chat-border); color: var(--chat-text); font-size: .78rem; font-weight: 600; padding: .5rem .65rem; }
+      .suggestion:hover { background: var(--chat-accent); color: #fff; }
       .message { display: grid; gap: .5rem; max-width: 92%; }
       .message.user { align-self: end; }
       .message.assistant { align-self: start; }
-      .bubble { background: var(--chat-surface); border-radius: .85rem; line-height: 1.5; padding: .8rem 1rem; white-space: pre-wrap; }
+      .bubble { background: var(--chat-surface); border-radius: .85rem; line-height: 1.5; padding: .8rem 1rem; }
+      .bubble p { margin: 0 0 .75rem; }
+      .bubble p:last-child { margin-bottom: 0; }
+      .bubble ul, .bubble ol { margin: .35rem 0 .75rem 1.25rem; padding: 0; }
+      .bubble li + li { margin-top: .25rem; }
+      .bubble h3 { font-size: 1rem; margin: 0 0 .5rem; }
+      .bubble code { background: rgb(0 0 0 / 7%); border-radius: .25rem; font-family: ui-monospace, SFMono-Regular, monospace; font-size: .88em; padding: .1rem .3rem; }
+      .bubble pre { background: rgb(0 0 0 / 7%); border-radius: .45rem; overflow-x: auto; padding: .7rem; white-space: pre; }
+      .bubble pre code { background: transparent; padding: 0; }
+      .bubble a { color: var(--chat-accent-strong); }
+      .citation { color: var(--chat-muted); font-size: .7em; font-weight: 650; opacity: .85; white-space: nowrap; }
       .user .bubble { background: var(--chat-accent); color: #fff; }
       .error .bubble { color: var(--chat-error); }
       .sources { display: grid; gap: .4rem; }
@@ -23,7 +41,7 @@
       summary { cursor: pointer; font-weight: 650; }
       .metadata { color: var(--chat-muted); margin: .55rem 0; }
       .document { line-height: 1.45; margin: 0; white-space: pre-wrap; }
-      form { border-top: 1px solid var(--chat-border); display: flex; gap: .6rem; padding: 1rem; }
+      form { border-top: 1px solid var(--chat-border); display: flex; gap: .6rem; padding: 1rem 1rem .55rem; }
       label { flex: 1; }
       .visually-hidden { clip: rect(0 0 0 0); clip-path: inset(50%); height: 1px; overflow: hidden; position: absolute; white-space: nowrap; width: 1px; }
       input { background: var(--chat-background); border: 1px solid var(--chat-border); border-radius: .65rem; color: var(--chat-text); font: inherit; min-width: 0; padding: .72rem .8rem; width: 100%; }
@@ -32,12 +50,14 @@
       button:hover { background: var(--chat-accent-strong); }
       button:disabled { cursor: wait; opacity: .65; }
       .status { color: var(--chat-muted); font-size: .75rem; min-height: 1.1rem; padding: 0 1rem .75rem; }
+      .composer-hint { color: var(--chat-muted); font-size: .72rem; margin: 0; padding: 0 1rem .8rem; }
       @media (max-width: 32rem) { .shell { border-radius: .75rem; } .messages { max-height: 26rem; padding: 1rem; } form { align-items: stretch; flex-direction: column; } }
     </style>
     <section class="shell" aria-label="Documentation chat">
-      <header><h2></h2><p>Answers are grounded in the available alert documentation.</p></header>
+      <header><div><h2></h2><p>Answers are grounded in the available alert documentation.</p></div><button class="new-chat" type="button">New chat</button></header>
       <div class="messages" aria-live="polite" aria-label="Chat messages" role="log" aria-busy="false"></div>
       <form><label><span class="visually-hidden">Ask a documentation question</span><input maxlength="2000" required /></label><button type="submit">Ask</button></form>
+      <p class="composer-hint">Ask naturally. You can refine the answer with another question.</p>
       <div class="status" role="status"></div>
     </section>`;
 
@@ -49,12 +69,15 @@
       this.messages = root.querySelector(".messages");
       this.form = root.querySelector("form");
       this.input = root.querySelector("input");
-      this.button = root.querySelector("button");
+      this.button = root.querySelector("form button");
+      this.newChatButton = root.querySelector(".new-chat");
       this.status = root.querySelector(".status");
+      this.welcomeText = this.getAttribute("welcome") || "Ask a question and I’ll answer from the available documentation.";
+      this.newChatButton.addEventListener("click", () => this.reset());
       root.querySelector("h2").textContent = this.getAttribute("title") || "Documentation assistant";
       this.input.placeholder = this.getAttribute("placeholder") || "Ask about an alert or symptom…";
       this.form.addEventListener("submit", (event) => this.submit(event));
-      this.addMessage("assistant", this.getAttribute("welcome") || "Ask a question and I’ll answer from the available documentation.");
+      this.showWelcome();
     }
 
     get apiUrl() { return this.getAttribute("api-url") || "/api/chat"; }
@@ -64,12 +87,88 @@
       message.className = `message ${role}${options.error ? " error" : ""}`;
       const bubble = document.createElement("div");
       bubble.className = "bubble";
-      bubble.textContent = text;
+      bubble.innerHTML = this.renderMarkdown(text);
       message.append(bubble);
       if (options.sources?.length) message.append(this.renderSources("Sources used", options.sources));
       if (options.possibleSources?.length) message.append(this.renderSources("Possible sources—not used as evidence", options.possibleSources));
       this.messages.append(message);
       this.messages.scrollTop = this.messages.scrollHeight;
+    }
+
+    renderMarkdown(markdown) {
+      const escape = (value) => value.replace(/[&<>"']/g, (character) => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;",
+      }[character]));
+      const inline = (value) => value
+        .replace(/`([^`]+)`/g, "<code>$1</code>")
+        .replace(/\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>')
+        .replace(/\[Alert ([^\]]+)\]/g, '<sup class="citation" aria-label="Source Alert $1">[$1]</sup>')
+        .replace(/\*\*([^*]+)\*\*/g, "<strong>$1</strong>")
+        .replace(/__([^_]+)__/g, "<strong>$1</strong>")
+        .replace(/\*([^*]+)\*/g, "<em>$1</em>")
+        .replace(/_([^_]+)_/g, "<em>$1</em>");
+      const lines = escape(String(markdown || "")).split("\n");
+      const output = [];
+      let listType = "";
+      let inCode = false;
+      for (const line of lines) {
+        if (line.trim().startsWith("```")) {
+          if (inCode) output.push("</code></pre>");
+          else output.push("<pre><code>");
+          inCode = !inCode;
+          continue;
+        }
+        if (inCode) { output.push(`${line}\n`); continue; }
+        const unordered = line.match(/^\s*[-*]\s+(.+)$/);
+        const ordered = line.match(/^\s*\d+[.)]\s+(.+)$/);
+        if (unordered || ordered) {
+          const nextType = unordered ? "ul" : "ol";
+          if (listType !== nextType) { if (listType) output.push(`</${listType}>`); output.push(`<${nextType}>`); listType = nextType; }
+          output.push(`<li>${inline(unordered ? unordered[1] : ordered[1])}</li>`);
+          continue;
+        }
+        if (listType) { output.push(`</${listType}>`); listType = ""; }
+        if (!line.trim()) continue;
+        const heading = line.match(/^#{1,3}\s+(.+)$/);
+        output.push(heading ? `<h3>${inline(heading[1])}</h3>` : `<p>${inline(line)}</p>`);
+      }
+      if (listType) output.push(`</${listType}>`);
+      if (inCode) output.push("</code></pre>");
+      return output.join("");
+    }
+
+    showWelcome() {
+      const panel = document.createElement("section");
+      panel.className = "welcome-panel";
+      const heading = document.createElement("strong");
+      heading.textContent = "Ask AI about the alert catalogue";
+      const copy = document.createElement("p");
+      copy.textContent = this.welcomeText;
+      const list = document.createElement("div");
+      list.className = "suggestions";
+      panel.append(heading, copy, list);
+      const suggestions = ["What does this alert mean?", "What should the operator do?", "When should service be called?"];
+      for (const suggestion of suggestions) {
+        const button = document.createElement("button");
+        button.className = "suggestion";
+        button.type = "button";
+        button.textContent = suggestion;
+        button.addEventListener("click", () => {
+          this.input.value = suggestion;
+          this.input.focus();
+        });
+        list.append(button);
+      }
+      this.messages.append(panel);
+    }
+
+    reset() {
+      if (this.button.disabled) return;
+      this.messages.replaceChildren();
+      this.status.textContent = "";
+      this.showWelcome();
+      this.input.value = "";
+      this.input.focus();
     }
 
     renderSources(label, sources) {
@@ -99,6 +198,7 @@
       event.preventDefault();
       const question = this.input.value.trim();
       if (!question || this.button.disabled) return;
+      this.messages.querySelector(".welcome-panel")?.remove();
       this.addMessage("user", question);
       this.input.value = "";
       this.button.disabled = true;
