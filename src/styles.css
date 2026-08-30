@@ -44,11 +44,20 @@ main { width: min(1440px, 100%); margin: 0 auto; padding: 20px clamp(18px, 4vw, 
 .site-banner .pdf-mini-icon { border-color: var(--action-line); color: var(--action); }
 .site-banner .pdf-mini-icon::after { border-color: var(--action-line); background: #f4f1ec; }
 .site-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); margin-top: 42px; padding: 18px 2px 0; color: var(--muted); }
-.chatbot-section { display: grid; grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr); align-items: start; gap: clamp(22px, 5vw, 72px); border-top: 1px solid var(--line); margin-top: 54px; padding: 36px 2px 0; }
-.chatbot-copy { padding-top: 8px; }
-.chatbot-copy .eyebrow { color: var(--action); font: 800 11px/1.2 "Manrope", sans-serif; letter-spacing: .1em; margin: 0 0 10px; text-transform: uppercase; }
-.chatbot-copy h2 { color: var(--ink); font: 800 clamp(24px, 3vw, 36px)/1.05 "Manrope", sans-serif; letter-spacing: -.04em; margin: 0; max-width: 440px; }
-.chatbot-copy > p:last-child { color: var(--muted); margin: 14px 0 0; max-width: 430px; }
+:root { --chatbot-drawer-width: clamp(320px, 30vw, 480px); }
+body.chatbot-open main { margin-left: 0; margin-right: var(--chatbot-drawer-width); width: calc(100% - var(--chatbot-drawer-width)); }
+.chatbot-launcher { position: fixed; right: 22px; bottom: 22px; z-index: 60; background: var(--action); border: 1px solid var(--action); border-radius: 999px; box-shadow: 0 10px 26px rgba(25,42,35,.22); color: white; font: 800 14px/1 "Manrope", sans-serif; padding: 14px 20px; transition: background-color .15s ease, transform .15s ease; }
+.chatbot-launcher:hover { background: var(--action-dark); transform: translateY(-2px); }
+.chatbot-launcher:focus-visible, .chatbot-close:focus-visible { outline: 3px solid #e2a4b2; outline-offset: 3px; }
+.chatbot-drawer { position: fixed; inset: 0 0 0 auto; z-index: 55; display: flex; flex-direction: column; width: var(--chatbot-drawer-width); background: var(--paper); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(25,42,35,.14); padding: 20px; overflow-y: auto; }
+.chatbot-drawer:focus { outline: none; }
+.chatbot-drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 16px; padding-bottom: 15px; }
+.chatbot-drawer-header h2 { color: var(--muted); font: 800 11px/1.2 "Manrope", sans-serif; letter-spacing: .12em; margin: 0; text-transform: uppercase; }
+.chatbot-drawer-actions { align-items: center; display: flex; gap: 8px; }
+.chatbot-new-chat { background: transparent; border: 1px solid var(--line); border-radius: 999px; color: var(--action-dark); font-size: 12px; font-weight: 700; padding: 7px 10px; }
+.chatbot-new-chat:hover { background: var(--action-soft); }
+.chatbot-close { flex: 0 0 auto; width: 34px; height: 34px; border: 1px solid var(--line); border-radius: 50%; background: transparent; color: var(--ink); font-size: 24px; line-height: 1; }
+.chatbot-close:hover { background: var(--action-soft); color: var(--action-dark); }
 documentation-chat { --chat-accent: var(--action); --chat-accent-strong: var(--action-dark); --chat-background: var(--paper); --chat-surface: #f3f5f1; --chat-border: var(--line); --chat-text: var(--ink); --chat-muted: var(--muted); --chat-error: #a33f52; max-width: none; min-width: 0; }
 .site-footer > div { display: flex; flex-direction: column; gap: 5px; }
 .site-footer strong { color: #5e5a56; font: 750 16px/1.25 "Manrope", sans-serif; }
@@ -369,7 +378,9 @@ select { border: 1px solid var(--line); border-radius: 10px; background: #f8f5f1
   .reuse-destinations { grid-template-columns: 1fr; }
   .reuse-destinations span { border-radius: 8px; text-align: left; }
   .about-sections { grid-template-columns: 1fr; }
-  .chatbot-section { grid-template-columns: 1fr; gap: 16px; }
+  .chatbot-launcher { bottom: 14px; right: 14px; }
+  .chatbot-drawer { padding: 14px; }
+  body.chatbot-open main { margin-right: 0; width: 100%; }
   .project-resources { align-items: flex-start; flex-direction: column; gap: 10px; }
   .project-resource-links { align-items: flex-start; flex-direction: column; }
   .glossary-term { grid-template-columns: 30px 1fr; padding: 19px 0; }

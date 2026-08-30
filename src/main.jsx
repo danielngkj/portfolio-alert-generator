@@ -112,21 +112,70 @@ function SiteBanner({ onNavigate, currentPath }) {
 }
 
 function SiteFooter({ onNavigate }) {
+  const [chatOpen, setChatOpen] = useState(false);
+  const launcherRef = useRef(null);
+  const drawerRef = useRef(null);
+  const chatRef = useRef(null);
+  const closeChat = () => {
+    setChatOpen(false);
+    window.requestAnimationFrame(() => launcherRef.current?.focus());
+  };
+
+  useEffect(() => {
+    document.body.classList.toggle("chatbot-open", chatOpen);
+    if (chatOpen) drawerRef.current?.focus();
+    return () => document.body.classList.remove("chatbot-open");
+  }, [chatOpen]);
+
+  useEffect(() => {
+    const closeOnEscape = (event) => {
+      if (event.key === "Escape" && chatOpen) {
+        closeChat();
+      }
+    };
+    document.addEventListener("keydown", closeOnEscape);
+    return () => document.removeEventListener("keydown", closeOnEscape);
+  }, [chatOpen]);
+
   return (
     <>
-      <section className="chatbot-section" aria-labelledby="chatbot-title">
-        <div className="chatbot-copy">
-          <p className="eyebrow">Need a faster answer?</p>
-          <h2 id="chatbot-title">Ask the alert documentation assistant</h2>
-          <p>Ask about an alert, symptom, or next step. Answers are grounded in this project's alert documentation.</p>
-        </div>
-        <documentation-chat
-          api-url={CHATBOT_API_URL}
-          title="Alert documentation assistant"
-          placeholder="What does this alert mean?"
-          welcome="Ask about an alert or symptom and I’ll search the available documentation."
-        />
-      </section>
+      {!chatOpen && (
+        <button
+          ref={launcherRef}
+          className="chatbot-launcher"
+          type="button"
+          aria-expanded={false}
+          aria-controls="chatbot-drawer"
+          onClick={() => setChatOpen(true)}
+        >Ask AI</button>
+      )}
+      {chatOpen && (
+        <aside
+          ref={drawerRef}
+          id="chatbot-drawer"
+          className="chatbot-drawer"
+          aria-label="Ask AI documentation assistant"
+          tabIndex="-1"
+        >
+          <div className="chatbot-drawer-header">
+            <div>
+              <h2>Ask AI</h2>
+            </div>
+            <div className="chatbot-drawer-actions">
+              <button className="chatbot-new-chat" type="button" onClick={() => chatRef.current?.reset()}>New chat</button>
+              <button className="chatbot-close" type="button" aria-label="Close Ask AI" onClick={closeChat}>×</button>
+            </div>
+          </div>
+          <documentation-chat
+            ref={chatRef}
+            hide-header="true"
+            api-url={CHATBOT_API_URL}
+            title="Ask AI"
+            placeholder="Ask about an alert or symptom…"
+            welcome="Ask about an alert or symptom and I’ll search the available documentation."
+          />
+        </aside>
+      )}
       <footer className="site-footer">
         <div>
           <strong>Alert atlas</strong>

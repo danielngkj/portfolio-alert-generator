@@ -311,10 +311,19 @@ generated PDF repeats the fictional-data notice on its cover and every page.
 
 ## Documentation chatbot
 
-The shared site footer embeds the dependency-free `documentation-chat` widget on every route. The
-widget script is vendored at `public/chatbot-widget.js` and the API endpoint is configured with the
-Vite build variable `VITE_CHATBOT_API_URL`. It defaults to `/api/chat`, which is suitable when the
-production host proxies that path to the chatbot API.
+Every route exposes a floating `Ask AI` button in the lower-right corner. Clicking it opens a
+responsive right-hand assistant pane while the alert portal remains visible at approximately a
+70:30 content split on desktop. The pane embeds the dependency-free `documentation-chat` widget;
+the widget script is vendored at `public/chatbot-widget.js` and the API endpoint is configured with
+the Vite build variable `VITE_CHATBOT_API_URL`. It defaults to `/api/chat`, which is suitable when
+the production host proxies that path to the chatbot API.
+
+The closed state keeps the chatbot out of the page flow until the visitor chooses `Ask AI`. The
+open pane uses one discreet `Ask AI` utility header, a larger `What can I help you with?` welcome
+headline, starter-question buttons, `New chat`, and a close button. On small screens the pane uses
+the full viewport width. Assistant responses render common Markdown (including headings, lists,
+emphasis, code, and HTTPS links); inline `[Alert ID]` citations are shown discreetly while the
+complete source metadata remains available in expandable sections.
 
 For a separately hosted chatbot API, set the variable during the production build:
 
@@ -325,6 +334,18 @@ VITE_CHATBOT_API_URL=https://your-chat-api.example/api/chat npm run build
 The chatbot API must allow `https://alerts.danielng.co` in its `CHAT_ALLOWED_ORIGINS` setting. Keep
 the OpenAI API key and alert index on the chatbot server; neither is sent to this site. The widget
 shows a bounded error until `/api/chat` is routed to a deployed chatbot API.
+
+For a local UI and API smoke check, start the API and portal as described above, then verify that
+the initial page shows only `Ask AI`, opening it creates the desktop 70:30 split, closing it restores
+the portal, starter prompts populate the composer, `New chat` clears the transcript, Markdown is
+formatted, and source disclosures still expand. The repeatable portal checks are:
+
+```bash
+node --check public/chatbot-widget.js
+node --check ../ai-documentation-chatbot/web/widget.js
+npm run build
+git diff --check
+```
 
 ## Notes
 

@@ -5,6 +5,7 @@
   template.innerHTML = `
     <style>
       :host { color: var(--chat-text); display: block; font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; max-width: 44rem; }
+      :host([hide-header]) header { display: none; }
       * { box-sizing: border-box; }
       .shell { background: var(--chat-background); border: 1px solid var(--chat-border); border-radius: 1rem; box-shadow: 0 1rem 2.5rem rgb(36 35 33 / 10%); overflow: hidden; }
       header { align-items: center; background: var(--chat-accent); color: #fff; display: flex; gap: 1rem; justify-content: space-between; padding: 1rem 1.25rem; }
@@ -13,8 +14,8 @@
       .new-chat { background: transparent; border: 1px solid rgb(255 255 255 / 55%); font-size: .78rem; padding: .45rem .65rem; white-space: nowrap; }
       .new-chat:hover { background: rgb(255 255 255 / 15%); }
       .messages { display: flex; flex-direction: column; gap: .9rem; max-height: 28rem; min-height: 15rem; overflow-y: auto; padding: 1.25rem; }
-      .welcome-panel { background: var(--chat-surface); border: 1px solid var(--chat-border); border-radius: .85rem; margin-bottom: .1rem; padding: 1rem; }
-      .welcome-panel strong { display: block; font-size: .92rem; margin-bottom: .3rem; }
+      .welcome-panel { background: transparent; border: 0; border-radius: .85rem; margin-bottom: .1rem; padding: .75rem .25rem 1.1rem; }
+      .welcome-panel strong { color: var(--chat-text); display: block; font: 800 clamp(1.6rem, 4vw, 2.25rem)/1.05 "Manrope", sans-serif; letter-spacing: -.045em; margin-bottom: .7rem; }
       .welcome-panel p { color: var(--chat-muted); font-size: .82rem; line-height: 1.45; margin: 0 0 .8rem; }
       .suggestions { display: flex; flex-wrap: wrap; gap: .45rem; }
       .suggestion { background: var(--chat-background); border: 1px solid var(--chat-border); color: var(--chat-text); font-size: .78rem; font-weight: 600; padding: .5rem .65rem; }
@@ -141,7 +142,7 @@
       const panel = document.createElement("section");
       panel.className = "welcome-panel";
       const heading = document.createElement("strong");
-      heading.textContent = "Ask AI about the alert catalogue";
+      heading.textContent = "What can I help you with?";
       const copy = document.createElement("p");
       copy.textContent = this.welcomeText;
       const list = document.createElement("div");
