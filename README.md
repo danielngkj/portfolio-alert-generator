@@ -197,8 +197,10 @@ only need to run the install command after cloning the project or when
 `package.json` changes:
 
 ```bash
-npm install
+npm ci
 ```
+
+Use `npm install` only when intentionally updating the dependency lockfile.
 
 Start the development server:
 
@@ -222,6 +224,26 @@ the development server.
 
 If port 5173 is already occupied, Vite selects another port; use the address it
 prints rather than assuming the default.
+
+### Preview the portal with the local chatbot API
+
+Use two terminals for a full local preview. In the chatbot repository, start the API with the
+Keychain-aware launcher:
+
+```bash
+cd ../ai-documentation-chatbot
+./scripts/run_api.sh --reload
+```
+
+In this repository, start the portal and point its widget at that API:
+
+```bash
+VITE_CHATBOT_API_URL=http://127.0.0.1:8000/api/chat npm run dev
+```
+
+Open the Vite URL, normally `http://localhost:5173/`. The API launcher allows both
+`http://localhost:5173` and `http://127.0.0.1:5173` and retrieves the OpenAI key from macOS
+Keychain. Locally refused questions do not need an API key; grounded answers do.
 
 ### Preview the production build
 
@@ -250,7 +272,9 @@ the GitHub repository into Vercel with these project settings:
 - Build command: `npm run build`
 - Output directory: `dist`
 - Production branch: `main`
-- Environment variables: none required
+- Environment variables: set `VITE_CHATBOT_API_URL` to the deployed chatbot endpoint, for example
+  `https://chat.example.com/api/chat`. If the host proxies `/api/chat` to the chatbot API, the
+  variable may be omitted.
 
 After deployment, verify `/about`, `/glossary`, `/sitemap`, a direct alert URL,
 `/downloads/alert-atlas.pdf`, and `/downloads/alert-atlas-catalog.xlsx`. Also
@@ -284,6 +308,23 @@ final acceptance remained the responsibility of the project owner.
 
 The website presents this disclosure on `/about` and in the shared footer. The
 generated PDF repeats the fictional-data notice on its cover and every page.
+
+## Documentation chatbot
+
+The shared site footer embeds the dependency-free `documentation-chat` widget on every route. The
+widget script is vendored at `public/chatbot-widget.js` and the API endpoint is configured with the
+Vite build variable `VITE_CHATBOT_API_URL`. It defaults to `/api/chat`, which is suitable when the
+production host proxies that path to the chatbot API.
+
+For a separately hosted chatbot API, set the variable during the production build:
+
+```bash
+VITE_CHATBOT_API_URL=https://your-chat-api.example/api/chat npm run build
+```
+
+The chatbot API must allow `https://alerts.danielng.co` in its `CHAT_ALLOWED_ORIGINS` setting. Keep
+the OpenAI API key and alert index on the chatbot server; neither is sent to this site. The widget
+shows a bounded error until `/api/chat` is routed to a deployed chatbot API.
 
 ## Notes
 

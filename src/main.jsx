@@ -56,6 +56,8 @@ const DEFAULT_VIEW_STATE = {
   sortConfig: { field: "severity", direction: "asc" },
 };
 
+const CHATBOT_API_URL = import.meta.env.VITE_CHATBOT_API_URL || "/api/chat";
+
 function loadViewState() {
   try {
     const stored = JSON.parse(sessionStorage.getItem("alert-atlas-view") || "{}");
@@ -111,19 +113,34 @@ function SiteBanner({ onNavigate, currentPath }) {
 
 function SiteFooter({ onNavigate }) {
   return (
-    <footer className="site-footer">
-      <div>
-        <strong>Alert atlas</strong>
-        <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
-        <span><span className="data-status" aria-hidden="true">●</span> Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
-      </div>
-      <nav aria-label="Footer navigation">
-        <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
-        <a href="/glossary" onClick={(event) => { event.preventDefault(); onNavigate("/glossary"); }}>Glossary</a>
-        <a href="/sitemap" onClick={(event) => { event.preventDefault(); onNavigate("/sitemap"); }}>Sitemap</a>
-        <a href="/about" onClick={(event) => { event.preventDefault(); onNavigate("/about"); }}>About</a>
-      </nav>
-    </footer>
+    <>
+      <section className="chatbot-section" aria-labelledby="chatbot-title">
+        <div className="chatbot-copy">
+          <p className="eyebrow">Need a faster answer?</p>
+          <h2 id="chatbot-title">Ask the alert documentation assistant</h2>
+          <p>Ask about an alert, symptom, or next step. Answers are grounded in this project's alert documentation.</p>
+        </div>
+        <documentation-chat
+          api-url={CHATBOT_API_URL}
+          title="Alert documentation assistant"
+          placeholder="What does this alert mean?"
+          welcome="Ask about an alert or symptom and I’ll search the available documentation."
+        />
+      </section>
+      <footer className="site-footer">
+        <div>
+          <strong>Alert atlas</strong>
+          <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
+          <span><span className="data-status" aria-hidden="true">●</span> Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
+        </div>
+        <nav aria-label="Footer navigation">
+          <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
+          <a href="/glossary" onClick={(event) => { event.preventDefault(); onNavigate("/glossary"); }}>Glossary</a>
+          <a href="/sitemap" onClick={(event) => { event.preventDefault(); onNavigate("/sitemap"); }}>Sitemap</a>
+          <a href="/about" onClick={(event) => { event.preventDefault(); onNavigate("/about"); }}>About</a>
+        </nav>
+      </footer>
+    </>
   );
 }
 

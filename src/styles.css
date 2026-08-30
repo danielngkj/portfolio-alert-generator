@@ -44,6 +44,12 @@ main { width: min(1440px, 100%); margin: 0 auto; padding: 20px clamp(18px, 4vw, 
 .site-banner .pdf-mini-icon { border-color: var(--action-line); color: var(--action); }
 .site-banner .pdf-mini-icon::after { border-color: var(--action-line); background: #f4f1ec; }
 .site-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); margin-top: 42px; padding: 18px 2px 0; color: var(--muted); }
+.chatbot-section { display: grid; grid-template-columns: minmax(220px, .72fr) minmax(0, 1.28fr); align-items: start; gap: clamp(22px, 5vw, 72px); border-top: 1px solid var(--line); margin-top: 54px; padding: 36px 2px 0; }
+.chatbot-copy { padding-top: 8px; }
+.chatbot-copy .eyebrow { color: var(--action); font: 800 11px/1.2 "Manrope", sans-serif; letter-spacing: .1em; margin: 0 0 10px; text-transform: uppercase; }
+.chatbot-copy h2 { color: var(--ink); font: 800 clamp(24px, 3vw, 36px)/1.05 "Manrope", sans-serif; letter-spacing: -.04em; margin: 0; max-width: 440px; }
+.chatbot-copy > p:last-child { color: var(--muted); margin: 14px 0 0; max-width: 430px; }
+documentation-chat { --chat-accent: var(--action); --chat-accent-strong: var(--action-dark); --chat-background: var(--paper); --chat-surface: #f3f5f1; --chat-border: var(--line); --chat-text: var(--ink); --chat-muted: var(--muted); --chat-error: #a33f52; max-width: none; min-width: 0; }
 .site-footer > div { display: flex; flex-direction: column; gap: 5px; }
 .site-footer strong { color: #5e5a56; font: 750 16px/1.25 "Manrope", sans-serif; }
 .site-footer span { font-size: 14px; }
@@ -363,6 +369,7 @@ select { border: 1px solid var(--line); border-radius: 10px; background: #f8f5f1
   .reuse-destinations { grid-template-columns: 1fr; }
   .reuse-destinations span { border-radius: 8px; text-align: left; }
   .about-sections { grid-template-columns: 1fr; }
+  .chatbot-section { grid-template-columns: 1fr; gap: 16px; }
   .project-resources { align-items: flex-start; flex-direction: column; gap: 10px; }
   .project-resource-links { align-items: flex-start; flex-direction: column; }
   .glossary-term { grid-template-columns: 30px 1fr; padding: 19px 0; }
