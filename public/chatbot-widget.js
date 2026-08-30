@@ -6,14 +6,16 @@
     <style>
       :host { color: var(--chat-text); display: block; font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; max-width: 44rem; }
       :host([hide-header]) header { display: none; }
+      :host([hide-header]) { height: 100%; min-height: 0; }
       * { box-sizing: border-box; }
-      .shell { background: var(--chat-background); border: 0; border-radius: 1rem; box-shadow: none; overflow: hidden; }
+      .shell { background: var(--chat-background); border: 0; border-radius: 1rem; box-shadow: none; display: flex; flex-direction: column; height: 100%; overflow: hidden; }
       header { align-items: center; background: var(--chat-accent); color: #fff; display: flex; gap: 1rem; justify-content: space-between; padding: 1rem 1.25rem; }
       h2 { font: 700 1.05rem/1.3 "Manrope", sans-serif; margin: 0; }
       header p { font-size: .82rem; margin: .25rem 0 0; opacity: .9; }
       .new-chat { background: transparent; border: 1px solid rgb(255 255 255 / 55%); font-size: .78rem; padding: .45rem .65rem; white-space: nowrap; }
       .new-chat:hover { background: rgb(255 255 255 / 15%); }
       .messages { display: flex; flex-direction: column; gap: .9rem; max-height: 28rem; min-height: 15rem; overflow-y: auto; padding: 1.25rem; }
+      :host([hide-header]) .messages { flex: 1 1 auto; max-height: none; min-height: 0; }
       .welcome-panel { background: transparent; border: 0; border-radius: .85rem; margin-bottom: .1rem; padding: .75rem .25rem 1.1rem; }
       .welcome-panel strong { color: var(--chat-text); display: block; font: 800 clamp(1.1rem, 2.6vw, 1.55rem)/1.05 "Manrope", sans-serif; letter-spacing: -.045em; margin-bottom: .7rem; }
       .welcome-panel p { color: var(--chat-muted); font-size: .82rem; line-height: 1.45; margin: 0 0 .8rem; }
