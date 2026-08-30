@@ -46,11 +46,14 @@ main { width: min(1440px, 100%); margin: 0 auto; padding: 20px clamp(18px, 4vw, 
 .site-footer { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; border-top: 1px solid var(--line); margin-top: 42px; padding: 18px 2px 0; color: var(--muted); }
 :root { --chatbot-drawer-width: clamp(320px, 30vw, 480px); }
 body.chatbot-open main { margin-left: 0; margin-right: var(--chatbot-drawer-width); width: calc(100% - var(--chatbot-drawer-width)); }
+body.chatbot-open { overflow: hidden; }
 .chatbot-launcher { position: fixed; right: 22px; bottom: 22px; z-index: 60; background: var(--action); border: 1px solid var(--action); border-radius: 999px; box-shadow: 0 10px 26px rgba(25,42,35,.22); color: white; font: 800 14px/1 "Manrope", sans-serif; padding: 14px 20px; transition: background-color .15s ease, transform .15s ease; }
 .chatbot-launcher:hover { background: var(--action-dark); transform: translateY(-2px); }
 .chatbot-launcher:focus-visible, .chatbot-close:focus-visible { outline: 3px solid #e2a4b2; outline-offset: 3px; }
 .chatbot-drawer { position: fixed; inset: 0 0 0 auto; z-index: 55; display: flex; flex-direction: column; justify-content: flex-start; width: var(--chatbot-drawer-width); background: var(--paper); border-left: 1px solid var(--line); box-shadow: -12px 0 32px rgba(25,42,35,.14); padding: 20px; overflow-y: auto; }
 .chatbot-drawer:focus { outline: none; }
+.chatbot-resize-handle { position: absolute; inset: 0 auto 0 -6px; z-index: 2; width: 12px; border: 0; border-radius: 0; background: transparent; cursor: ew-resize; padding: 0; touch-action: none; }
+.chatbot-resize-handle:hover, .chatbot-resize-handle:focus-visible { background: rgba(22, 101, 52, .12); outline: none; }
 .chatbot-drawer-header { display: flex; align-items: center; justify-content: space-between; gap: 18px; border-bottom: 1px solid var(--line); margin-bottom: 16px; padding-bottom: 15px; }
 .chatbot-drawer-header h2 { color: var(--muted); font: 800 11px/1.2 "Manrope", sans-serif; letter-spacing: .12em; margin: 0; text-transform: uppercase; }
 .chatbot-drawer-actions { align-items: center; display: flex; gap: 8px; }

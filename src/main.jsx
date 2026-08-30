@@ -113,12 +113,44 @@ function SiteBanner({ onNavigate, currentPath }) {
 
 function SiteFooter({ onNavigate }) {
   const [chatOpen, setChatOpen] = useState(false);
+  const [chatWidth, setChatWidth] = useState(null);
   const launcherRef = useRef(null);
   const drawerRef = useRef(null);
   const chatRef = useRef(null);
   const closeChat = () => {
     setChatOpen(false);
     window.requestAnimationFrame(() => launcherRef.current?.focus());
+  };
+
+  useEffect(() => {
+    const root = document.documentElement;
+    if (chatWidth) root.style.setProperty("--chatbot-drawer-width", `${chatWidth}px`);
+    return () => root.style.removeProperty("--chatbot-drawer-width");
+  }, [chatWidth]);
+
+  const resizeChat = (event) => {
+    event.preventDefault();
+    const startX = event.clientX;
+    const startWidth = drawerRef.current?.getBoundingClientRect().width || 360;
+    const updateWidth = (moveEvent) => {
+      const maxWidth = Math.max(200, Math.min(window.innerWidth * 0.7, 720));
+      setChatWidth(Math.min(maxWidth, Math.max(200, startWidth + startX - moveEvent.clientX)));
+    };
+    const stopResize = () => {
+      window.removeEventListener("pointermove", updateWidth);
+      window.removeEventListener("pointerup", stopResize);
+    };
+    window.addEventListener("pointermove", updateWidth);
+    window.addEventListener("pointerup", stopResize, { once: true });
+  };
+
+  const resizeWithKeyboard = (event) => {
+    if (!["ArrowLeft", "ArrowRight"].includes(event.key)) return;
+    event.preventDefault();
+    const currentWidth = drawerRef.current?.getBoundingClientRect().width || 360;
+    const maxWidth = Math.max(200, Math.min(window.innerWidth * 0.7, 720));
+    const change = event.key === "ArrowLeft" ? 20 : -20;
+    setChatWidth(Math.min(maxWidth, Math.max(200, currentWidth + change)));
   };
 
   useEffect(() => {
@@ -157,6 +189,18 @@ function SiteFooter({ onNavigate }) {
           aria-label="Ask AI documentation assistant"
           tabIndex="-1"
         >
+          <button
+            className="chatbot-resize-handle"
+            type="button"
+            role="separator"
+            aria-orientation="vertical"
+            aria-label="Resize Ask AI sidebar"
+            aria-valuemin="200"
+            aria-valuemax="720"
+            aria-valuenow={chatWidth || undefined}
+            onPointerDown={resizeChat}
+            onKeyDown={resizeWithKeyboard}
+          />
           <div className="chatbot-drawer-header">
             <div>
               <h2>Ask AI</h2>
