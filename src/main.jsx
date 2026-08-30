@@ -806,6 +806,17 @@ function AboutPage({ onNavigate, currentPath }) {
   );
 }
 
+function FlowIcon({ name }) {
+  const paths = {
+    question: <><path d="M5 5.5A3.5 3.5 0 0 1 8.5 2h3A3.5 3.5 0 0 1 15 5.5v3a3.5 3.5 0 0 1-3.5 3.5H9l-3.5 2v-2.7A3.5 3.5 0 0 1 5 8.5v-3Z" /><path d="M9.2 6.2a1.5 1.5 0 1 1 2.3 1.3c-.8.4-1 .7-1 1.3M10.5 10.7h.01" /></>,
+    widget: <><rect x="2.5" y="3" width="13" height="11" rx="1.5" /><path d="M2.5 6h13M6 9h2M10 9h3M6 11.5h5" /></>,
+    api: <><rect x="3" y="2.5" width="12" height="3" rx="1" /><rect x="3" y="7" width="12" height="3" rx="1" /><rect x="3" y="11.5" width="12" height="3" rx="1" /><path d="M5.5 4h.01M5.5 8.5h.01M5.5 13h.01" /></>,
+    evidence: <><path d="M4 2.5h6l3 3v8.8a1.2 1.2 0 0 1-1.2 1.2H4a1.2 1.2 0 0 1-1.2-1.2V3.7A1.2 1.2 0 0 1 4 2.5Z" /><path d="M10 2.8V6h3M6 9h4M6 11.5h3" /><circle cx="12.5" cy="12" r="2.3" /><path d="m14.2 13.7 1.5 1.5" /></>,
+    response: <><path d="M4 2.5h6l3 3v8.8a1.2 1.2 0 0 1-1.2 1.2H4a1.2 1.2 0 0 1-1.2-1.2V3.7A1.2 1.2 0 0 1 4 2.5Z" /><path d="M10 2.8V6h3M5.5 10l2 2 4-4" /></>,
+  };
+  return <svg className="chatbot-flow-icon" viewBox="0 0 18 18" fill="none" stroke="currentColor" strokeLinecap="round" strokeLinejoin="round" strokeWidth="1.4" aria-hidden="true">{paths[name]}</svg>;
+}
+
 function ChatbotPage({ onNavigate, currentPath }) {
   return (
     <main className="group-page-shell">
@@ -813,7 +824,7 @@ function ChatbotPage({ onNavigate, currentPath }) {
       <header className="group-page-header" id="main-content" tabIndex="-1">
         <span>Portfolio project</span>
         <h1 data-route-heading tabIndex="-1">How the chatbot works</h1>
-        <p>A high-level look at how Alert atlas turns a natural-language question into a grounded documentation answer.</p>
+        <p>See how a visitor’s question becomes a cited answer based on the alert documentation.</p>
       </header>
 
       <section className="chatbot-architecture" aria-labelledby="chatbot-architecture-title">
@@ -822,34 +833,30 @@ function ChatbotPage({ onNavigate, currentPath }) {
           <h2 id="chatbot-architecture-title">From question to useful answer</h2>
         </div>
         <div className="chatbot-flow" aria-label="Chatbot request flow diagram">
-          <div className="chatbot-flow-node"><span>01 · Ask</span><strong>Visitor question</strong><small>“What should the operator do?”</small></div>
+          <div className="chatbot-flow-node"><FlowIcon name="question" /><span>01 · Ask</span><strong>Visitor question</strong><small>“What should the operator do?”</small></div>
           <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
-          <div className="chatbot-flow-node"><span>02 · Send</span><strong>Portal widget</strong><small>Simple chat interface in Alert atlas</small></div>
+          <div className="chatbot-flow-node"><FlowIcon name="widget" /><span>02 · Send</span><strong>Portal widget</strong><small>Simple chat interface in Alert atlas</small></div>
           <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
-          <div className="chatbot-flow-node"><span>03 · Find</span><strong>Chat API</strong><small>Searches the alert documentation index</small></div>
+          <div className="chatbot-flow-node"><FlowIcon name="api" /><span>03 · Find</span><strong>Chat API</strong><small>Searches the alert documentation index</small></div>
           <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
-          <div className="chatbot-flow-node"><span>04 · Ground</span><strong>Relevant evidence</strong><small>Accepted alert sources and metadata</small></div>
+          <div className="chatbot-flow-node"><FlowIcon name="evidence" /><span>04 · Find support</span><strong>Relevant evidence</strong><small>Accepted alert sources and metadata</small></div>
           <span className="chatbot-flow-arrow" aria-hidden="true">→</span>
-          <div className="chatbot-flow-node"><span>05 · Return</span><strong>Cited response</strong><small>Answer, citations, and expandable sources</small></div>
+          <div className="chatbot-flow-node"><FlowIcon name="response" /><span>05 · Return</span><strong>Cited response</strong><small>Answer, citations, and expandable sources</small></div>
         </div>
       </section>
 
       <div className="chatbot-overview-sections">
         <section>
           <h2>What I built</h2>
-          <p>The chatbot is a small grounded question-and-answer layer for the synthetic alert catalogue. The portal provides the interaction, while a separate API retrieves relevant documentation and asks the language model to answer only from that evidence.</p>
+          <p>The portal sends a visitor’s question to a separate API, which retrieves relevant alert documentation before generating a cited answer.</p>
         </section>
         <section>
           <h2>How it was created</h2>
-          <p>I started with a structured alert dataset, added retrieval and source metadata, then introduced generated answers behind a stable API contract. The widget was added as a dependency-free web component so it can be embedded without coupling the portal to the chatbot runtime.</p>
+          <p>A structured alert dataset powers retrieval and source metadata. A dependency-free web component keeps the interface embeddable, while the stable API keeps the portal separate from the chatbot runtime.</p>
         </section>
         <section>
-          <h2>Grounding by design</h2>
-          <p>Questions are matched against the alert documentation before an answer is generated. Responses retain alert citations and expose the supporting source records so a visitor can inspect where the answer came from.</p>
-        </section>
-        <section>
-          <h2>Bounded behavior</h2>
-          <p>If the documentation does not support an answer, the chatbot refuses or asks for a clearer alert-related question. The browser never receives the provider key or direct access to the document index.</p>
+          <h2>Evidence and safety</h2>
+          <p>Answers use relevant alert documentation, retain citations, and expose supporting sources. When the documentation cannot support an answer, the chatbot refuses rather than filling the gap with general knowledge. The browser never receives the provider key or direct index access.</p>
         </section>
       </div>
       <section className="chatbot-try-it" aria-labelledby="chatbot-try-title">
@@ -858,7 +865,6 @@ function ChatbotPage({ onNavigate, currentPath }) {
           <h2 id="chatbot-try-title">Ask AI from the portal</h2>
           <p>Use the floating `Ask AI` button on any page to open the assistant without leaving the alert catalogue.</p>
         </div>
-        <button type="button" onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}>Back to top ↑</button>
       </section>
       <SiteFooter onNavigate={onNavigate} />
     </main>

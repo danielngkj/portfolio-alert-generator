@@ -243,7 +243,7 @@ VITE_CHATBOT_API_URL=http://127.0.0.1:8000/api/chat npm run dev
 
 Open the Vite URL, normally `http://localhost:5173/`. The API launcher allows both
 `http://localhost:5173` and `http://127.0.0.1:5173` and retrieves the OpenAI key from macOS
-Keychain. Locally refused questions do not need an API key; grounded answers do.
+Keychain. Locally refused questions do not need an API key; documentation-supported answers do.
 
 ### Preview the production build
 

@@ -7,7 +7,7 @@
       :host { color: var(--chat-text); display: block; font-family: "DM Sans", ui-sans-serif, system-ui, sans-serif; max-width: 44rem; }
       :host([hide-header]) header { display: none; }
       * { box-sizing: border-box; }
-      .shell { background: var(--chat-background); border: 1px solid var(--chat-border); border-radius: 1rem; box-shadow: 0 1rem 2.5rem rgb(36 35 33 / 10%); overflow: hidden; }
+      .shell { background: var(--chat-background); border: 0; border-radius: 1rem; box-shadow: none; overflow: hidden; }
       header { align-items: center; background: var(--chat-accent); color: #fff; display: flex; gap: 1rem; justify-content: space-between; padding: 1rem 1.25rem; }
       h2 { font: 700 1.05rem/1.3 "Manrope", sans-serif; margin: 0; }
       header p { font-size: .82rem; margin: .25rem 0 0; opacity: .9; }
@@ -15,10 +15,10 @@
       .new-chat:hover { background: rgb(255 255 255 / 15%); }
       .messages { display: flex; flex-direction: column; gap: .9rem; max-height: 28rem; min-height: 15rem; overflow-y: auto; padding: 1.25rem; }
       .welcome-panel { background: transparent; border: 0; border-radius: .85rem; margin-bottom: .1rem; padding: .75rem .25rem 1.1rem; }
-      .welcome-panel strong { color: var(--chat-text); display: block; font: 800 clamp(1.6rem, 4vw, 2.25rem)/1.05 "Manrope", sans-serif; letter-spacing: -.045em; margin-bottom: .7rem; }
+      .welcome-panel strong { color: var(--chat-text); display: block; font: 800 clamp(1.1rem, 2.6vw, 1.55rem)/1.05 "Manrope", sans-serif; letter-spacing: -.045em; margin-bottom: .7rem; }
       .welcome-panel p { color: var(--chat-muted); font-size: .82rem; line-height: 1.45; margin: 0 0 .8rem; }
       .suggestions { display: flex; flex-wrap: wrap; gap: .45rem; }
-      .suggestion { background: var(--chat-background); border: 1px solid var(--chat-border); color: var(--chat-text); font-size: .78rem; font-weight: 600; padding: .5rem .65rem; }
+      .suggestion { background: var(--chat-background); border: 1px solid var(--chat-border); color: var(--chat-text); font-size: .78rem; font-weight: 600; padding: .5rem .65rem; text-align: left; }
       .suggestion:hover { background: var(--chat-accent); color: #fff; }
       .message { display: grid; gap: .5rem; max-width: 92%; }
       .message.user { align-self: end; }
@@ -50,15 +50,14 @@
       button { background: var(--chat-accent); border: 0; border-radius: .65rem; color: #fff; cursor: pointer; font: inherit; font-weight: 700; padding: .72rem 1rem; }
       button:hover { background: var(--chat-accent-strong); }
       button:disabled { cursor: wait; opacity: .65; }
+      .send-button { font-size: 1.2rem; line-height: 1; min-width: 2.75rem; padding-left: .7rem; padding-right: .7rem; }
       .status { color: var(--chat-muted); font-size: .75rem; min-height: 1.1rem; padding: 0 1rem .75rem; }
-      .composer-hint { color: var(--chat-muted); font-size: .72rem; margin: 0; padding: 0 1rem .8rem; }
       @media (max-width: 32rem) { .shell { border-radius: .75rem; } .messages { max-height: 26rem; padding: 1rem; } form { align-items: stretch; flex-direction: column; } }
     </style>
     <section class="shell" aria-label="Documentation chat">
       <header><div><h2></h2><p>Answers are grounded in the available alert documentation.</p></div><button class="new-chat" type="button">New chat</button></header>
       <div class="messages" aria-live="polite" aria-label="Chat messages" role="log" aria-busy="false"></div>
-      <form><label><span class="visually-hidden">Ask a documentation question</span><input maxlength="2000" required /></label><button type="submit">Ask</button></form>
-      <p class="composer-hint">Ask naturally. You can refine the answer with another question.</p>
+      <form><label><span class="visually-hidden">Ask a documentation question</span><input maxlength="2000" required /></label><button class="send-button" type="submit" aria-label="Send question">↑</button></form>
       <div class="status" role="status"></div>
     </section>`;
 
@@ -148,7 +147,11 @@
       const list = document.createElement("div");
       list.className = "suggestions";
       panel.append(heading, copy, list);
-      const suggestions = ["What does this alert mean?", "What should the operator do?", "When should service be called?"];
+      const suggestions = [
+        "Which alerts need the most urgent attention?",
+        "How do operator, service, and technician responses differ?",
+        "What kinds of problems can affect coffee machine service?",
+      ];
       for (const suggestion of suggestions) {
         const button = document.createElement("button");
         button.className = "suggestion";
