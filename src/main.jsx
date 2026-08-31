@@ -245,10 +245,14 @@ function SiteFooter({ onNavigate }) {
         </aside>
       )}
       <footer className="site-footer">
-        <div>
-          <strong>Alert atlas</strong>
-          <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
-          <span><span className="data-status" aria-hidden="true">●</span> Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
+        <div className="site-footer-meta">
+          <div className="site-footer-line">
+            <strong>Alert atlas</strong>
+            <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
+          </div>
+          <div className="site-footer-line site-footer-data">
+            <span>Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
+          </div>
         </div>
         <nav aria-label="Footer navigation">
           <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
@@ -780,7 +784,7 @@ function AboutPage({ onNavigate, currentPath }) {
           <h2 id="pipeline-title">From source to publication</h2>
         </div>
         <div className="pipeline-flow">
-          <div className="pipeline-node">
+          <div className="pipeline-node pipeline-source">
             <span>Source</span>
             <a
               className="pipeline-source-link"
@@ -791,17 +795,17 @@ function AboutPage({ onNavigate, currentPath }) {
             </a>
           </div>
           <span className="pipeline-arrow" aria-hidden="true">→</span>
-          <div className="pipeline-node">
+          <div className="pipeline-node pipeline-transform">
             <span>Transform</span>
             <strong>Python generation and extraction</strong>
           </div>
           <span className="pipeline-arrow" aria-hidden="true">→</span>
-          <div className="pipeline-node">
+          <div className="pipeline-node pipeline-structured">
             <span>Structured data</span>
             <strong>Reusable JSON alert records</strong>
           </div>
           <span className="pipeline-arrow" aria-hidden="true">→</span>
-          <div className="pipeline-node pipeline-outputs">
+          <div className="pipeline-node pipeline-publish pipeline-outputs">
             <span>Publish</span>
             <strong>Searchable website</strong>
             <strong>PDF handbook</strong>
@@ -816,9 +820,9 @@ function AboutPage({ onNavigate, currentPath }) {
             </div>
             <span className="reuse-arrow" aria-hidden="true">→</span>
             <div className="reuse-destinations" aria-label="Reused in three places">
-              <span>Glossary page</span>
-              <span>Table tooltips</span>
-              <span>Alert detail tooltips</span>
+              <span className="reuse-destination glossary">Glossary page</span>
+              <span className="reuse-destination tooltip">Table tooltips</span>
+              <span className="reuse-destination detail">Alert detail tooltips</span>
             </div>
           </div>
         </div>
