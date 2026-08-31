@@ -83,6 +83,26 @@ function formatTimestamp(timestamp) {
   }).format(new Date(timestamp));
 }
 
+function PortfolioBar({ onNavigate }) {
+  return (
+    <div className="portfolio-bar" aria-label="Portfolio context">
+      <div className="portfolio-bar-inner">
+        <span>Portfolio project by <strong>Daniel Ng</strong></span>
+        <span className="portfolio-divider" aria-hidden="true">·</span>
+        <a href="/about" onClick={(event) => { event.preventDefault(); onNavigate("/about"); }}>Case study</a>
+        <span className="portfolio-divider" aria-hidden="true">·</span>
+        <a
+          href="https://github.com/danielngkj/portfolio-alert-generator"
+          target="_blank"
+          rel="noreferrer"
+        >GitHub</a>
+        <span className="portfolio-divider" aria-hidden="true">·</span>
+        <a href="https://danielng.co" target="_blank" rel="noreferrer">Back to portfolio</a>
+      </div>
+    </div>
+  );
+}
+
 function SiteBanner({ onNavigate, currentPath }) {
   const resourceLink = (path, label, className) => (
     <a
@@ -93,21 +113,24 @@ function SiteBanner({ onNavigate, currentPath }) {
     >{label}</a>
   );
   return (
-    <header className="site-banner">
-      <a className="skip-link" href="#main-content">Skip to main content</a>
-      <a className="site-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>
-        <span className="bean-icon" aria-hidden="true" />
-        <span><strong>ACME COFFEE</strong></span>
-      </a>
-      <nav aria-label="Site navigation">
-        {resourceLink("/glossary", "Glossary")}
-        {resourceLink("/sitemap", "Sitemap")}
-        {resourceLink("/about", "About this project", "nav-featured")}
-        <a className="banner-download" href="/downloads/alert-atlas.pdf" download>
-          <span className="pdf-mini-icon" aria-hidden="true">PDF</span> Download PDF
+    <>
+      <PortfolioBar onNavigate={onNavigate} />
+      <header className="site-banner">
+        <a className="skip-link" href="#main-content">Skip to main content</a>
+        <a className="site-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>
+          <span className="bean-icon" aria-hidden="true" />
+          <span><strong>ACME COFFEE</strong></span>
         </a>
-      </nav>
-    </header>
+        <nav aria-label="Site navigation">
+          {resourceLink("/glossary", "Glossary")}
+          {resourceLink("/sitemap", "Sitemap")}
+          {resourceLink("/about", "About this project", "nav-featured")}
+          <a className="banner-download" href="/downloads/alert-atlas.pdf" download>
+            <span className="pdf-mini-icon" aria-hidden="true">PDF</span> Download PDF
+          </a>
+        </nav>
+      </header>
+    </>
   );
 }
 
