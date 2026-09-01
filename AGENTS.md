@@ -66,6 +66,22 @@ Build the production site and PDF (full pipeline from dirty source to clean publ
 npm run build
 ```
 
+## Automatic data synchronization
+
+A GitHub Actions workflow (`.github/workflows/sync-chatbot-data.yml`) monitors changes to cleaned alert data and automatically synchronizes the dataset to the [`ai-documentation-chatbot`](https://github.com/danielngkj/ai-documentation-chatbot) repository.
+
+**Workflow trigger:** Pushes to `main` affecting:
+- `data/alerts-ds-clean.json`
+- `scripts/clean_alert_language.py`
+- `scripts/extract_alerts.py`
+
+**Workflow actions:**
+1. Copies cleaned JSON to chatbot repo `data/sample-alerts.json`
+2. Reindexes the Chroma vector database
+3. Commits and pushes to `ai-documentation-chatbot/main`
+
+This keeps both products synchronized with the same verified alert content. The workflow uses `git diff --cached --quiet` to avoid empty commits when no actual changes occurred.
+
 ## Taxonomy conventions
 
 - Use `Major Group` for the four broad organizational groups.

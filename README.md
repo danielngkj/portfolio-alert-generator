@@ -375,6 +375,38 @@ npm run build
 git diff --check
 ```
 
+## Data synchronization with AI chatbot
+
+The repository includes a GitHub Actions workflow (`.github/workflows/sync-chatbot-data.yml`) that automatically synchronizes the cleaned alert data to the [`ai-documentation-chatbot`](https://github.com/danielngkj/ai-documentation-chatbot) repository.
+
+### How it works
+
+When you push to the `main` branch with changes to:
+- `data/alerts-ds-clean.json` (cleaned alert data)
+- `scripts/clean_alert_language.py` (cleanup script)
+- `scripts/extract_alerts.py` (extraction script)
+
+The workflow automatically:
+1. Copies the cleaned JSON to the chatbot's `data/sample-alerts.json`
+2. Reindexes the chatbot's Chroma vector database with the new alert data
+3. Commits and pushes the updated dataset to `ai-documentation-chatbot`
+
+This ensures both the Alert atlas portal and the AI chatbot always have the same cleaned, verified alert content.
+
+### Manual synchronization
+
+To sync data manually without pushing changes:
+
+```bash
+# Copy cleaned data
+cp data/alerts-ds-clean.json ../ai-documentation-chatbot/data/sample-alerts.json
+
+# Reindex the chatbot
+cd ../ai-documentation-chatbot
+python scripts/index_alerts.py
+cd ../portfolio-alert-generator
+```
+
 ## Notes
 
 The alert data is synthetic and intended for demonstration, portfolio, or testing purposes rather than live equipment monitoring data.
