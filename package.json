@@ -4,11 +4,14 @@
   "version": "1.0.0",
   "type": "module",
   "scripts": {
-    "predev": "npm run generate:pdf && npm run publish:xlsx",
+    "generate:alerts": "python scripts/generate_alerts.py",
+    "clean:alerts": "python scripts/clean_alert_language.py data/source/alerts-ds.xlsx -o data/generated/alerts-ds-clean.xlsx --report data/quality/language-cleanup-report.json",
+    "extract:alerts": "python scripts/extract_alerts.py data/generated/alerts-ds-clean.xlsx -o data/alerts-ds-clean.json",
+    "predev": "npm run generate:alerts && npm run clean:alerts && npm run extract:alerts && npm run generate:pdf && npm run publish:xlsx",
     "dev": "vite",
     "generate:pdf": "node scripts/generate-alerts-pdf.js",
     "publish:xlsx": "node scripts/publish-alerts-workbook.js",
-    "build": "npm run generate:pdf && npm run publish:xlsx && vite build",
+    "build": "npm run generate:alerts && npm run clean:alerts && npm run extract:alerts && npm run generate:pdf && npm run publish:xlsx && vite build",
     "preview": "vite preview"
   },
   "dependencies": {

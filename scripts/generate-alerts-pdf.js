@@ -5,7 +5,7 @@ import PDFDocument from "pdfkit";
 
 const scriptDirectory = path.dirname(fileURLToPath(import.meta.url));
 const projectRoot = path.resolve(scriptDirectory, "..");
-const sourcePath = path.join(projectRoot, "data", "alerts-ds.json");
+const sourcePath = path.join(projectRoot, "data", "alerts-ds-clean.json");
 const outputPath = path.join(projectRoot, "output", "pdf", "alert-atlas.pdf");
 const publicPath = path.join(projectRoot, "public", "downloads", "alert-atlas.pdf");
 const data = JSON.parse(fs.readFileSync(sourcePath, "utf8"));

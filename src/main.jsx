@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
-import alertsData from "../data/alerts-ds.json";
+import alertsData from "../data/alerts-ds-clean.json";
 import "./styles.css";
 
 const ALL = "All";
@@ -862,6 +862,31 @@ function AboutPage({ onNavigate, currentPath }) {
           <p>ACME COFFEE, its coffee machine models, alerts, and guidance are fictional. This project is not associated with any real manufacturer and is not intended for use with real equipment.</p>
         </section>
       </div>
+      <section className="quality-evidence" aria-labelledby="quality-evidence-title">
+        <div className="quality-evidence-header">
+          <span>Quality evidence</span>
+          <h2 id="quality-evidence-title">Raw source to cleaned publication</h2>
+        </div>
+        <div className="quality-grid" aria-label="Quality evidence summary">
+          <div className="quality-stat">
+            <strong>189</strong>
+            <span>misspellings</span>
+          </div>
+          <div className="quality-stat">
+            <strong>39</strong>
+            <span>double spaces</span>
+          </div>
+          <div className="quality-stat">
+            <strong>59</strong>
+            <span>missing final periods</span>
+          </div>
+          <div className="quality-stat">
+            <strong>183</strong>
+            <span>text changes cleaned</span>
+          </div>
+        </div>
+        <p>The source workbook intentionally includes human-style text drift so this project can demonstrate a data-quality pass before publication. The cleanup workflow normalizes common errors while preserving operational abbreviations and service-safe guidance. For example: <code>maschine</code> → <code>machine</code>, <code>maintenece</code> → <code>maintenance</code>.</p>
+      </section>
       <section className="project-resources" aria-labelledby="project-resources-title">
         <div className="project-resources-copy">
           <h2 id="project-resources-title">Project resources</h2>
