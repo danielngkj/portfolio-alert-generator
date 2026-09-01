@@ -1,16 +1,18 @@
 # Alert atlas
 
 Alert atlas is a searchable React knowledge base for a fictional industrial coffee
-machine. The repository also includes Python tools for extracting the
-frontend JSON dataset and generating a synthetic Excel alert workbook.
+machine. The repository also includes Python tools for generating a synthetic workbook with intentional errors, detecting quality issues, normalizing text, extracting the frontend JSON dataset, and generating a PDF handbook.
 
 ## Contents
 
 - `data/source/alerts-ds.xlsx` is the source alert workbook
-- `data/alerts-ds.json` is the frontend data source
+- `data/generated/alerts-ds-clean.xlsx` is the cleaned workbook used for publication
+- `data/alerts-ds-clean.json` is the frontend data source (cleaned from the workbook)
 - `data/reference/` contains the protected reference workbook
-- `scripts/extract_alerts.py` converts the source workbook to JSON
-- `scripts/generate_alerts.py` creates a synthetic workbook programmatically
+- `scripts/generate_alerts.py` creates a synthetic workbook with intentional human-style errors
+- `scripts/check_language_quality.py` detects text quality issues and generates a report
+- `scripts/clean_alert_language.py` normalizes spelling, spacing, and punctuation
+- `scripts/extract_alerts.py` converts the cleaned workbook to JSON
 - `scripts/generate-alerts-pdf.js` creates the downloadable alert handbook
 - `scripts/publish-alerts-workbook.js` copies the active workbook to the public download path
 - `src/` contains the React interface and CSS
