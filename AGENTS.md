@@ -17,18 +17,15 @@ catalogue, extract the frontend JSON dataset, and publish the PDF handbook.
 
 The normal data flow is:
 
-1. `scripts/generate_alerts.py` generates an Excel workbook.
-2. `data/source/alerts-ds.xlsx` is the active source workbook used by extraction.
-3. `scripts/extract_alerts.py` generates `data/alerts-ds.json` for the site.
-4. `scripts/generate-alerts-pdf.js` generates the PDF handbook from that JSON.
-5. `scripts/publish-alerts-workbook.js` publishes the active workbook under the
-   public download filename.
-6. Vite builds the React site from the same JSON data.
+1. `scripts/generate_alerts.py` generates a dirty synthetic workbook with intentional human-style errors in `data/source/alerts-ds.xlsx`.
+2. `scripts/check_language_quality.py` detects text issues and generates a quality report.
+3. `scripts/clean_alert_language.py` normalizes spelling, spacing, and punctuation in `data/generated/alerts-ds-clean.xlsx`.
+4. `scripts/extract_alerts.py` extracts the cleaned workbook to `data/alerts-ds-clean.json`.
+5. `scripts/generate-alerts-pdf.js` generates the PDF handbook from the clean JSON.
+6. `scripts/publish-alerts-workbook.js` publishes the active source workbook under the public download filename.
+7. Vite builds the React site from the cleaned JSON data.
 
-Do not manually edit `data/alerts-ds.json` when the change belongs in the Excel
-source or generator. Regenerate downstream artifacts instead. Only replace
-`data/source/alerts-ds.xlsx` when the task explicitly calls for updating the
-active source workbook.
+The full pipeline (generate → clean → extract → build) runs automatically on `npm run dev` and `npm run build`. Do not manually edit `data/alerts-ds-clean.json` when the change belongs in the Excel source or generator. Regenerate downstream artifacts instead. Only replace `data/source/alerts-ds.xlsx` when the task explicitly calls for updating the active source workbook.
 
 ## Standard commands
 
@@ -39,31 +36,31 @@ python -m pip install -r requirements.txt
 npm install
 ```
 
-Generate a workbook without replacing the active source:
+Generate a synthetic workbook (dirty source with intentional errors):
 
 ```bash
-python scripts/generate_alerts.py
+npm run generate:alerts
 ```
 
-Refresh the frontend JSON from the active source workbook:
+Clean the source workbook and generate quality report:
 
 ```bash
-python scripts/extract_alerts.py
+npm run clean:alerts
 ```
 
-Generate the PDF:
+Extract cleaned JSON for the frontend:
 
 ```bash
-npm run generate:pdf
+npm run extract:alerts
 ```
 
-Run the development site:
+Run the development site (automatically generates, cleans, extracts, and rebuilds):
 
 ```bash
 npm run dev
 ```
 
-Build the production site and PDF:
+Build the production site and PDF (full pipeline from dirty source to clean publication):
 
 ```bash
 npm run build

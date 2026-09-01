@@ -83,12 +83,16 @@ under four major groups:
 Run:
 
 ```bash
-python scripts/generate_alerts.py
+npm run generate:alerts
 ```
 
-This creates or updates `data/generated/alerts-ds-generated.xlsx`. The filename
-mirrors the source workbook, `data/source/alerts-ds.xlsx`, while making it clear
-that the workbook was generated.
+This creates or updates `data/source/alerts-ds.xlsx` with a new synthetic dataset. The cleanup pipeline will automatically run when you build or start the development server, producing a cleaned workbook and JSON for publication.
+
+To regenerate manually without rebuilding:
+
+```bash
+python scripts/generate_alerts.py
+```
 
 To write to a different file:
 
@@ -125,12 +129,32 @@ python scripts/generate_alerts.py \
 The error rate must be between `0.0` and `1.0`. Using the same rate and seed
 produces the same intentional errors each time.
 
-## Extract the frontend data
+## Data quality and cleanup
 
-Regenerate `data/alerts-ds.json` from `data/source/alerts-ds.xlsx`:
+The generated workbook intentionally includes human-style text errors (misspellings, spacing drift, missing punctuation) to demonstrate a realistic data-quality workflow.
+
+Check for language quality issues:
 
 ```bash
-python scripts/extract_alerts.py
+python scripts/check_language_quality.py data/source/alerts-ds.xlsx
+```
+
+This produces a JSON report of detected misspellings, abbreviation usage, double spaces, and missing terminal punctuation.
+
+Clean the source workbook:
+
+```bash
+npm run clean:alerts
+```
+
+This normalizes spelling, spacing, and punctuation while preserving operational abbreviations and service-safe guidance. It produces `data/generated/alerts-ds-clean.xlsx` and a cleanup report.
+
+## Extract the frontend data
+
+Regenerate `data/alerts-ds-clean.json` from the cleaned workbook:
+
+```bash
+npm run extract:alerts
 ```
 
 The JSON includes metadata with its UTC generation timestamp, source workbook
@@ -208,8 +232,7 @@ Start the development server:
 npm run dev
 ```
 
-Starting the development server also regenerates the PDF handbook and publishes
-the active Excel workbook so both About-page downloads work locally.
+Starting the development server automatically generates a synthetic workbook, cleans it, extracts the JSON, regenerates the PDF handbook, and publishes the active Excel workbook so both About-page downloads work locally.
 
 Vite prints the local address in the terminal, normally:
 
