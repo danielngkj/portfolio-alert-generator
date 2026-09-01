@@ -43,6 +43,8 @@ dist/
 ~$*.xlsx
 outputs/
 data/generated/
+data/quality/
+data/alerts-ds-clean.json
 
 # Generated PDF publications
 output/pdf/
