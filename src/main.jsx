@@ -809,7 +809,10 @@ function AboutPage({ onNavigate, currentPath }) {
             <span>Publish</span>
             <strong>Website</strong>
             <strong>PDF handbook</strong>
-            <strong>Grounded AI assistant</strong>
+            <strong className="pipeline-assistant">
+              <span className="ai-badge">AI</span>
+              Grounded AI assistant
+            </strong>
           </div>
         </div>
         <div className="reuse-map" aria-labelledby="reuse-map-title">
