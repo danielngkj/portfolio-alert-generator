@@ -1,0 +1,58 @@
+name: Sync cleaned alerts to chatbot
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'data/alerts-ds-clean.json'
+      - 'scripts/clean_alert_language.py'
+      - 'scripts/extract_alerts.py'
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout portfolio-alert-generator
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Checkout chatbot repo
+        uses: actions/checkout@v4
+        with:
+          repository: danielngkj/ai-documentation-chatbot
+          path: ai-documentation-chatbot
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Copy cleaned alerts to chatbot
+        run: |
+          cp data/alerts-ds-clean.json ai-documentation-chatbot/data/sample-alerts.json
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12'
+
+      - name: Install Python dependencies
+        run: |
+          cd ai-documentation-chatbot
+          python -m pip install -r requirements.txt
+
+      - name: Reindex chatbot alerts
+        run: |
+          cd ai-documentation-chatbot
+          python scripts/index_alerts.py
+
+      - name: Commit and push to chatbot
+        run: |
+          cd ai-documentation-chatbot
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add data/sample-alerts.json data/indexes/
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "Sync cleaned alerts from portfolio-alert-generator"
+            git push
+          fi
