@@ -776,7 +776,7 @@ function AboutPage({ onNavigate, currentPath }) {
       <header className="group-page-header" id="main-content" tabIndex="-1">
         <span>Portfolio project</span>
         <h1 data-route-heading tabIndex="-1">About Alert atlas</h1>
-        <p>A portfolio showcase to show how I built and turned one structured source into help for web and print.</p>
+        <p>A portfolio showcase to show how I built and turned one structured source into help for the web, print, and an AI assistant.</p>
       </header>
       <section className="pipeline-diagram" aria-labelledby="pipeline-title">
         <div className="pipeline-heading">
@@ -834,11 +834,11 @@ function AboutPage({ onNavigate, currentPath }) {
       <div className="about-sections">
         <section>
           <h2>Why it exists</h2>
-          <p>This alert documentation generator turns a spreadsheet-based coffee machine alert catalogue into a searchable website, downloadable PDF, and grounded AI assistant. It keeps support information easy to find, understand, and maintain.</p>
+          <p>This alert documentation generator turns a spreadsheet-based coffee machine alert catalogue into a searchable website, downloadable PDF, and grounded AI assistant from one shared source. It keeps support information easy to find, understand, and maintain.</p>
         </section>
         <section>
           <h2>Reusable content</h2>
-          <p>One structured dataset powers the website, handbook, and AI assistant. Glossary definitions are maintained in one central list and reused on the reference page and in relevant tooltips.</p>
+          <p>One structured dataset powers the website, handbook, and AI assistant. Glossary definitions are maintained in one central list and reused on the reference page and in relevant tooltips to keep the experience consistent.</p>
         </section>
         <section>
           <h2>How it was built</h2>
