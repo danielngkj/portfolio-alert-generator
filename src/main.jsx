@@ -807,8 +807,9 @@ function AboutPage({ onNavigate, currentPath }) {
           <span className="pipeline-arrow" aria-hidden="true">→</span>
           <div className="pipeline-node pipeline-publish pipeline-outputs">
             <span>Publish</span>
-            <strong>Searchable website</strong>
+            <strong>Website</strong>
             <strong>PDF handbook</strong>
+            <strong>Grounded AI assistant</strong>
           </div>
         </div>
         <div className="reuse-map" aria-labelledby="reuse-map-title">
@@ -830,11 +831,11 @@ function AboutPage({ onNavigate, currentPath }) {
       <div className="about-sections">
         <section>
           <h2>Why it exists</h2>
-          <p>This alert documentation generator turns a spreadsheet-based coffee machine alert catalogue into a searchable website and downloadable PDF. It keeps support information easy to find, understand, and maintain.</p>
+          <p>This alert documentation generator turns a spreadsheet-based coffee machine alert catalogue into a searchable website, downloadable PDF, and grounded AI assistant. It keeps support information easy to find, understand, and maintain.</p>
         </section>
         <section>
           <h2>Reusable content</h2>
-          <p>One structured dataset powers both the website and handbook. Glossary definitions are maintained in one central list and reused on the reference page and in relevant tooltips.</p>
+          <p>One structured dataset powers the website, handbook, and AI assistant. Glossary definitions are maintained in one central list and reused on the reference page and in relevant tooltips.</p>
         </section>
         <section>
           <h2>How it was built</h2>
