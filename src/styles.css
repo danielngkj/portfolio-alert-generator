@@ -55,7 +55,8 @@ main { width: min(1440px, 100%); margin: 0 auto; padding: 20px clamp(18px, 4vw, 
 .site-footer-line { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px; }
 .site-footer-data { justify-content: flex-start; text-align: left; font-size: 12px; color: #8d877f; }
 .site-footer strong { color: #5e5a56; font: 750 16px/1.25 "Manrope", sans-serif; }
-.site-footer .site-disclaimer { color: #8f8881; font-size: 12px; font-weight: 400; line-height: 1.4; }
+.site-footer .portfolio-bar-inner { justify-content: flex-start; min-height: 0; padding: 0; font-size: 12px; }
+.site-footer .portfolio-bar-inner a { font-size: 12px; }
 :root { --chatbot-drawer-width: clamp(320px, 30vw, 480px); }
 body.chatbot-open main { margin-left: 0; margin-right: var(--chatbot-drawer-width); width: calc(100% - var(--chatbot-drawer-width)); }
 body.chatbot-open { overflow: hidden; }
@@ -83,7 +84,6 @@ documentation-chat { --chat-accent: var(--action); --chat-accent-strong: var(--a
 .site-footer > div { display: flex; flex-direction: column; gap: 5px; }
 .site-footer strong { color: #5e5a56; font: 750 16px/1.25 "Manrope", sans-serif; }
 .site-footer span { font-size: 14px; }
-.site-footer .site-disclaimer { color: #8f8881; font-weight: 400; }
 .site-footer .data-status { color: #a94a5f; font-size: 8px; margin-right: 5px; }
 .site-footer nav { display: flex; gap: 15px; }
 .site-footer a { color: #77736f; font-size: 15px; text-decoration: none; }

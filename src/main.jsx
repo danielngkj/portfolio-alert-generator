@@ -83,21 +83,11 @@ function formatTimestamp(timestamp) {
   }).format(new Date(timestamp));
 }
 
-function PortfolioBar({ onNavigate }) {
+function PortfolioBar({ className = "" }) {
   return (
-    <div className="portfolio-bar" aria-label="Portfolio context">
+    <div className={`portfolio-bar ${className}`.trim()} aria-label="Portfolio context">
       <div className="portfolio-bar-inner">
-        <span>Portfolio project by <strong>Daniel Ng</strong></span>
-        <span className="portfolio-divider" aria-hidden="true">·</span>
-        <a href="/about" onClick={(event) => { event.preventDefault(); onNavigate("/about"); }}>Case study</a>
-        <span className="portfolio-divider" aria-hidden="true">·</span>
-        <a
-          href="https://github.com/danielngkj/portfolio-alert-generator"
-          target="_blank"
-          rel="noreferrer"
-        >GitHub</a>
-        <span className="portfolio-divider" aria-hidden="true">·</span>
-        <a href="https://danielng.co" target="_blank" rel="noreferrer">Back to portfolio</a>
+        <span>Designed and developed by <a href="https://www.danielng.co" target="_blank" rel="noreferrer">Daniel Ng</a>.</span>
       </div>
     </div>
   );
@@ -114,7 +104,6 @@ function SiteBanner({ onNavigate, currentPath }) {
   );
   return (
     <>
-      <PortfolioBar onNavigate={onNavigate} />
       <header className="site-banner">
         <a className="skip-link" href="#main-content">Skip to main content</a>
         <a className="site-brand" href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>
@@ -246,13 +235,10 @@ function SiteFooter({ onNavigate }) {
       )}
       <footer className="site-footer">
         <div className="site-footer-meta">
-          <div className="site-footer-line">
-            <strong>Alert atlas</strong>
-            <span className="site-disclaimer">Portfolio demonstration · Fictional data · Not for operational use</span>
-          </div>
           <div className="site-footer-line site-footer-data">
             <span>Data generated {formatTimestamp(dataGeneratedAt)} · {alerts.length} records</span>
           </div>
+          <PortfolioBar className="site-footer-portfolio" />
         </div>
         <nav aria-label="Footer navigation">
           <a href="/" onClick={(event) => { event.preventDefault(); onNavigate("/"); }}>Alerts</a>
