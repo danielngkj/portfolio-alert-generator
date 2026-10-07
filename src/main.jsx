@@ -1146,7 +1146,7 @@ function App() {
   }
 
   return (
-    <main>
+    <main className="catalogue-page">
       <SiteBanner onNavigate={navigate} currentPath={path} />
       <header className="hero" id="main-content" tabIndex="-1">
         <div className="hero-copy">
