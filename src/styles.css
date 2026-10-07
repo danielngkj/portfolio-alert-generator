@@ -97,6 +97,7 @@ documentation-chat { --chat-accent: var(--action); --chat-accent-strong: var(--a
 .bean-icon::after { content: ""; position: absolute; left: 7px; top: 2px; width: 1.5px; height: 16px; border-radius: 50%; background: #e2a4b2; transform: rotate(12deg); }
 .hero-copy { display: flex; align-items: center; justify-content: space-between; gap: 32px; position: relative; z-index: 1; }
 h1 { font: 800 clamp(38px, 5.3vw, 68px)/.98 "Manrope", sans-serif; letter-spacing: -.055em; max-width: 760px; margin: 0; }
+.hero-heading { font-size: clamp(30px, 3.6vw, 46px); letter-spacing: -.04em; max-width: 520px; }
 .hero-copy > div > p { color: #c8d8d1; font-size: clamp(16px, 2vw, 20px); margin: 22px 0 0; }
 .summary { display: flex; align-items: center; gap: 18px; padding: 12px 15px; background: rgba(255,255,255,.09); border: 1px solid rgba(255,255,255,.15); border-radius: 13px; backdrop-filter: blur(8px); white-space: nowrap; }
 .summary-stat { display: flex; align-items: baseline; gap: 6px; }

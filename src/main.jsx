@@ -1151,7 +1151,7 @@ function App() {
       <header className="hero" id="main-content" tabIndex="-1">
         <div className="hero-copy">
           <div>
-            <h1 data-route-heading tabIndex="-1">Help with your coffee machine</h1>
+            <h1 className="hero-heading" data-route-heading tabIndex="-1">Find an alert</h1>
             <p>Look up an alert and find out what to do next.</p>
           </div>
           <div className="summary" aria-label="Alert summary">
